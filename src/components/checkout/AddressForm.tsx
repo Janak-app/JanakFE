@@ -10,7 +10,7 @@ import useMutationApi, { DynamicMutationPayload } from "@/hooks/useMutationApi";
 const LABELS = ["HOME", "WORK", "OTHER"] as const;
 
 const addressSchema = z.object({
-  label: z.enum(LABELS, { required_error: "Select a label" }),
+  label: z.enum(LABELS),
   fullName: z.string().min(1, "Full name is required"),
   phone: z.string().min(10, "Enter a valid phone number").max(13),
   addressLine1: z.string().min(1, "Address line 1 is required"),
@@ -155,7 +155,10 @@ export default function AddressForm({ onSave, onClose }: AddressFormProps) {
             />
           </Field>
 
-          <Field label="Address Line 2 (optional)" error={errors.addressLine2?.message}>
+          <Field
+            label="Address Line 2 (optional)"
+            error={errors.addressLine2?.message}
+          >
             <input
               {...register("addressLine2")}
               placeholder="Area, Landmark"
@@ -165,9 +168,17 @@ export default function AddressForm({ onSave, onClose }: AddressFormProps) {
 
           <div className="flex gap-3">
             <Field label="City" error={errors.city?.message} className="flex-1">
-              <input {...register("city")} placeholder="Mumbai" className={inputCls} />
+              <input
+                {...register("city")}
+                placeholder="Mumbai"
+                className={inputCls}
+              />
             </Field>
-            <Field label="Pincode" error={errors.pincode?.message} className="flex-1">
+            <Field
+              label="Pincode"
+              error={errors.pincode?.message}
+              className="flex-1"
+            >
               <input
                 {...register("pincode")}
                 placeholder="400069"
@@ -178,7 +189,11 @@ export default function AddressForm({ onSave, onClose }: AddressFormProps) {
           </div>
 
           <Field label="State" error={errors.state?.message}>
-            <input {...register("state")} placeholder="Maharashtra" className={inputCls} />
+            <input
+              {...register("state")}
+              placeholder="Maharashtra"
+              className={inputCls}
+            />
           </Field>
 
           {/* Set as default toggle */}
@@ -193,12 +208,18 @@ export default function AddressForm({ onSave, onClose }: AddressFormProps) {
               >
                 <div
                   className={`w-5 h-5 rounded border-2 flex items-center justify-center shrink-0 transition-colors ${
-                    field.value ? "bg-[#1A4F9C] border-[#1A4F9C]" : "border-[#D1D5DB]"
+                    field.value
+                      ? "bg-[#1A4F9C] border-[#1A4F9C]"
+                      : "border-[#D1D5DB]"
                   }`}
                 >
-                  {field.value && <Check className="w-3 h-3 text-white" strokeWidth={3} />}
+                  {field.value && (
+                    <Check className="w-3 h-3 text-white" strokeWidth={3} />
+                  )}
                 </div>
-                <span className="text-sm text-[#374151] font-medium">Set as default address</span>
+                <span className="text-sm text-[#374151] font-medium">
+                  Set as default address
+                </span>
               </button>
             )}
           />

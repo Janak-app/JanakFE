@@ -29,14 +29,12 @@ export function mapApiProduct(p: ApiProduct): Product {
   return {
     id: p.id,
     name: p.name,
-    brand: p.brand.name,
-    category: p.category.name,
-    categoryKey: p.category.slug,
+    brand: p.brand?.name ?? "",
+    category: p.category?.name ?? "",
+    categoryKey: p.category?.slug ?? "",
     model: p.modelNumber,
     price,
-    priceLabel: price
-      ? `₹${price.toLocaleString("en-IN")}`
-      : "Get Quote",
+    priceLabel: price ? `₹${price.toLocaleString("en-IN")}` : "Get Quote",
     stock: STOCK_MAP[p.stockStatus] ?? "On Order",
     images: sortedImages.map((img) => img.url),
     description: p.description,
@@ -49,7 +47,7 @@ export function mapApiProduct(p: ApiProduct): Product {
 }
 
 function buildParams(
-  filters: ProductFilters = {}
+  filters: ProductFilters = {},
 ): Record<string, string | number | boolean> {
   const raw: Record<string, string | number | boolean | undefined> = {
     search: filters.search,
@@ -65,7 +63,7 @@ function buildParams(
   };
 
   return Object.fromEntries(
-    Object.entries(raw).filter(([, v]) => v !== undefined && v !== "")
+    Object.entries(raw).filter(([, v]) => v !== undefined && v !== ""),
   ) as Record<string, string | number | boolean>;
 }
 

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ShoppingCart, Plus, Minus, Tag } from "lucide-react";
+import { ShoppingCart, Plus, Minus, Tag, Loader2 } from "lucide-react";
 import Header from "@/components/layout/Header";
 import Button from "@/components/ui/Button";
 import { useCart } from "@/context/CartContext";
@@ -12,10 +12,10 @@ import { formatINR } from "@/data/products";
 
 export default function CartPage() {
   const router = useRouter();
-  const { items, serverItems, updateQty, removeItem, subtotal, gst, total, cartCount } = useCart();
+  const { items, serverItems, updateQty, removeItem, subtotal, gst, total, cartCount, cartLoading } = useCart();
   const { show } = useToast();
   const [coupon, setCoupon] = useState("");
-  const empty = items.length === 0;
+  const empty = !cartLoading && items.length === 0;
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
@@ -36,7 +36,11 @@ export default function CartPage() {
         )}
       </div>
 
-      {empty ? (
+      {cartLoading ? (
+        <div className="flex-1 flex items-center justify-center">
+          <Loader2 className="w-8 h-8 text-primary animate-spin" />
+        </div>
+      ) : empty ? (
         <div className="flex-1 flex flex-col items-center justify-center px-6 gap-4">
           <div className="w-24 h-24 rounded-full bg-info flex items-center justify-center">
             <ShoppingCart className="w-12 h-12 text-primary" />
@@ -56,12 +60,13 @@ export default function CartPage() {
                 const serverItem = serverItems.find((s) => s.product.id === it.productId);
                 if (!serverItem) return null;
                 const { product } = serverItem;
+                if (!product?.images) return null;
                 const primaryImage = product.images.find((img) => img.isPrimary) ?? product.images[0];
                 return (
                   <div key={it.productId} className="flex gap-3 bg-white border border-border rounded-xl p-3">
                     <img src={primaryImage?.url} alt={product.name} className="w-20 h-24 rounded-lg object-cover bg-surface shrink-0" />
                     <div className="flex-1 min-w-0">
-                      <p className="text-[9px] font-bold text-text-secondary tracking-[1.2px]">{product.brand.name.toUpperCase()}</p>
+                      {product.brand && <p className="text-[9px] font-bold text-text-secondary tracking-[1.2px]">{product.brand.name.toUpperCase()}</p>}
                       <p className="text-sm font-semibold text-text-primary mt-0.5 leading-snug line-clamp-2">{product.name}</p>
                       <p className="text-xs text-text-secondary mt-1">Model: {product.modelNumber}</p>
                       <div className="flex items-center justify-between mt-2.5">
@@ -141,7 +146,7 @@ export default function CartPage() {
           {/* Checkout bar */}
           <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-border px-4 py-3 pb-5">
             <div className="max-w-3xl mx-auto flex items-center gap-4">
-              <div>
+          <div>
                 <p className="text-[11px] text-text-secondary">Total</p>
                 <p className="text-lg font-bold text-text-primary">{formatINR(Math.round(total))}</p>
               </div>

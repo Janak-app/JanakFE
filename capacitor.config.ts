@@ -1,11 +1,14 @@
 import type { CapacitorConfig } from "@capacitor/cli";
+import * as dotenv from "dotenv";
+dotenv.config();
 
 const config: CapacitorConfig = {
   appId: "com.janakpositioning.app",
   appName: "Janak",
   webDir: "out",                     // Next.js static export output directory
   server: {
-    androidScheme: "https",          // Use HTTPS scheme on Android for cookies/auth
+    url: process.env.CAPACITOR_SERVER_URL ?? "https://janak-fe-roan.vercel.app",
+    cleartext: false,
   },
   plugins: {
     SplashScreen: {

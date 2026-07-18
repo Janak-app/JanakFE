@@ -14,19 +14,8 @@ const STEPS = ["Address", "Payment", "Review"];
 
 export default function CheckoutReviewPage() {
   const router = useRouter();
-  const { items, subtotal, gst, total, clearCart } = useCart();
+  const { items, subtotal, gst, total } = useCart();
   const [agree, setAgree] = useState(true);
-  const [loading, setLoading] = useState(false);
-
-  const handlePlace = () => {
-    if (!agree) return;
-    setLoading(true);
-    setTimeout(() => {
-      clearCart();
-      setLoading(false);
-      router.replace("/checkout/success");
-    }, 1100);
-  };
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
@@ -120,7 +109,7 @@ export default function CheckoutReviewPage() {
             <p className="text-lg font-bold text-[#111827]">{formatINR(Math.round(total))}</p>
           </div>
           <div className="flex-1">
-            <Button label={loading ? "Placing..." : "Place Order"} onClick={handlePlace} loading={loading} disabled={!agree} />
+            <Button label="Place Order" onClick={() => agree && router.push("/checkout/payment")} disabled={!agree} />
           </div>
         </div>
       </div>

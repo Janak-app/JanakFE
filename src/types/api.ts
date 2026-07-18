@@ -53,8 +53,8 @@ export type ApiProduct = {
   isFeatured: boolean;
   isNewArrival: boolean;
   isActive: boolean;
-  category: ApiCategory;
-  brand: ApiBrand;
+  category: ApiCategory | null;
+  brand: ApiBrand | null;
   images: ApiProductImage[];
   specs?: ApiProductSpec[];
   documents?: ApiProductDocument[];

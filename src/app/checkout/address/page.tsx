@@ -118,7 +118,7 @@ export default function CheckoutAddressPage() {
 
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-[#E5E7EB] px-4 py-3 pb-6 z-20">
         <div className="max-w-3xl mx-auto">
-          <Button label="Continue to Payment" onClick={() => router.push(`/checkout/payment?addressId=${selected}`)} />
+          <Button label="Continue to Payment" onClick={() => { localStorage.setItem("checkoutAddressId", selected); router.push("/checkout/payment"); }} />
         </div>
       </div>
 

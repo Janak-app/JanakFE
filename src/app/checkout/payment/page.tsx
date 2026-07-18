@@ -1,7 +1,6 @@
 "use client";
 
-import { useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useState, useEffect } from "react";
 import { Smartphone, Building2, CreditCard, ShieldCheck, AtSign, CheckCircle } from "lucide-react";
 import Header from "@/components/layout/Header";
 import Button from "@/components/ui/Button";
@@ -25,9 +24,11 @@ const METHODS: { key: PayMethod; label: string; sub: string; Icon: React.Element
 export default function CheckoutPaymentPage() {
   const [method, setMethod] = useState<PayMethod>("upi");
   const [upiId, setUpiId] = useState("");
+  const [addressId, setAddressId] = useState("");
 
-  const searchParams = useSearchParams();
-  const addressId = searchParams.get("addressId") ?? "";
+  useEffect(() => {
+    setAddressId(localStorage.getItem("checkoutAddressId") ?? "");
+  }, []);
 
   const { items, serverItems, subtotal, gst, total } = useCart();
   const { user } = useAuth();

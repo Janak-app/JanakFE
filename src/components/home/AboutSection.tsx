@@ -11,7 +11,7 @@ const STATS = [
 
 export default function AboutSection() {
   return (
-    <section className="max-w-7xl mx-auto px-6 py-16">
+    <section className="max-w-7xl mx-auto px-4 py-16">
       <h2 className="text-3xl font-extrabold text-[#111827] mb-10">About Janak Positioning</h2>
 
       <div className="flex flex-col lg:flex-row gap-12">

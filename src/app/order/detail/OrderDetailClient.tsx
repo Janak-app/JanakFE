@@ -1,225 +1,264 @@
 "use client";
 
+import { useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { ChevronLeft, Phone, CheckCircle, Download } from "lucide-react";
-import Header from "@/components/layout/Header";
-import StatusBadge from "@/components/ui/StatusBadge";
-import Button from "@/components/ui/Button";
+import {
+  ChevronLeft, Share2, Heart, Star,
+  CheckCircle, FileText, BarChart2, Download,
+  ChevronRight, ClipboardList,
+} from "lucide-react";
+import InfoBanner from "@/components/ui/InfoBanner";
+import FeaturedCard from "@/components/products/FeaturedCard";
 import { orders } from "@/data/orders";
-import { user, salesRep } from "@/data/user";
-import { useToast } from "@/context/ToastContext";
+import { products } from "@/data/products";
 
-const TIMELINE: Record<string, { label: string; done: boolean; date: string }[]> = {
-  Delivered: [
-    { label: "Order Placed", done: true, date: "12 Jan 2026" },
-    { label: "Confirmed", done: true, date: "12 Jan 2026" },
-    { label: "Shipped", done: true, date: "14 Jan 2026" },
-    { label: "Out for Delivery", done: true, date: "18 Jan 2026" },
-    { label: "Delivered", done: true, date: "19 Jan 2026" },
-  ],
-  Shipped: [
-    { label: "Order Placed", done: true, date: "18 Mar 2026" },
-    { label: "Confirmed", done: true, date: "18 Mar 2026" },
-    { label: "Shipped", done: true, date: "20 Mar 2026" },
-    { label: "Out for Delivery", done: false, date: "—" },
-    { label: "Delivered", done: false, date: "—" },
-  ],
-};
+const TABS = ["Overview", "Specifications", "Downloads", "Reviews"] as const;
+type TabKey = typeof TABS[number];
 
 export default function OrderDetailClient() {
   const searchParams = useSearchParams();
   const id = searchParams.get("id") ?? "";
   const router = useRouter();
-  const { show } = useToast();
 
   const order = orders.find((o) => o.id === id);
 
+  const [imgIdx, setImgIdx] = useState(0);
+  const [wishlisted, setWishlisted] = useState(false);
+  const [tab, setTab] = useState<TabKey>("Overview");
+
   if (!order) {
     return (
-      <div className="min-h-screen bg-white flex flex-col">
-        <Header />
-        <div className="flex-1 flex items-center justify-center">
-          <p className="text-sm text-[#6B7280]">Order not found.</p>
-        </div>
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <p className="text-sm text-[#6B7280]">Order not found.</p>
       </div>
     );
   }
 
-  const timeline = TIMELINE[order.status] || TIMELINE.Delivered;
-  const canCancel = order.status === "Pending" || order.status === "Confirmed";
-
-  const statusMsg =
-    order.status === "Delivered"
-      ? "Order delivered successfully"
-      : order.status === "Shipped"
-      ? "Your order is on the way"
-      : "Order is being processed";
+  const images = [order.productImage];
+  const bookingAmount = "₹60,000";
 
   return (
-    <div className="min-h-screen bg-[#F5F5F7]">
-      <Header />
+    <div className="min-h-screen bg-white flex flex-col">
 
-      {/* Page header */}
-      <div className="bg-white border-b border-[#E5E7EB]">
-        <div className="max-w-3xl mx-auto px-4 py-3 flex items-center gap-3">
-          <button onClick={() => router.back()} className="w-8 h-8 rounded-full bg-[#F5F5F7] flex items-center justify-center">
-            <ChevronLeft className="w-4 h-4 text-[#111827]" />
-          </button>
-          <div>
-            <h1 className="text-base font-bold text-[#111827]">Order Detail</h1>
-            <p className="text-[11px] text-[#6B7280]">{order.id}</p>
-          </div>
+      {/* ── Top bar ── */}
+      <div className="flex items-center px-4 pt-4 pb-2 gap-2">
+        <button
+          onClick={() => router.back()}
+          className="w-9 h-9 flex items-center justify-center"
+        >
+          <ChevronLeft className="w-5 h-5 text-[#111827]" />
+        </button>
+        <p className="flex-1 text-[16px] font-bold text-[#111827]">Receiver</p>
+        <button className="w-9 h-9 flex items-center justify-center">
+          <Share2 className="w-5 h-5 text-[#111827]" />
+        </button>
+        <button
+          onClick={() => setWishlisted((v) => !v)}
+          className="w-9 h-9 flex items-center justify-center"
+        >
+          <Heart className={`w-5 h-5 ${wishlisted ? "fill-accent text-accent" : "text-[#111827]"}`} />
+        </button>
+      </div>
+
+      {/* ── Image carousel ── */}
+      <div className="bg-[#F5F5F7] mx-4 rounded-2xl overflow-hidden">
+        <div className="h-64 flex items-center justify-center">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={images[imgIdx]}
+            alt={order.productName}
+            className="w-full h-full object-contain p-4"
+          />
+        </div>
+        {/* Dot indicators */}
+        <div className="flex justify-center gap-1.5 pb-3">
+          {images.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => setImgIdx(i)}
+              className={`h-1.5 rounded-full transition-all ${
+                i === imgIdx ? "w-5 bg-[#9CA3AF]" : "w-1.5 bg-[#D1D5DB]"
+              }`}
+            />
+          ))}
         </div>
       </div>
 
-      <div className="max-w-3xl mx-auto px-4 py-4 pb-10 flex flex-col gap-4">
-        {/* Status banner */}
-        <div className="bg-[#EFF6FF] border border-[#DBEAFE] rounded-xl p-4 flex items-center justify-between">
-          <div>
-            <div className="flex items-center gap-2 mb-1.5">
-              <StatusBadge status={order.status} />
-              <span className="text-[11px] text-[#6B7280]">{order.date}</span>
-            </div>
-            <p className="text-sm font-semibold text-[#111827]">{statusMsg}</p>
-          </div>
-          {order.status === "Delivered" ? (
-            <CheckCircle className="w-8 h-8 text-[#16A34A]" />
-          ) : (
-            <div className="w-8 h-8 rounded-full bg-[#1A4F9C]/10 flex items-center justify-center">
-              <div className="w-4 h-4 rounded-full border-2 border-[#1A4F9C] border-t-transparent animate-spin" />
-            </div>
-          )}
+      {/* ── Product info ── */}
+      <div className="px-4 pt-4 flex flex-col gap-3 pb-28">
+
+        {/* Category pill */}
+        <span className="self-start text-[12px] font-semibold text-[#1A4F9C] border border-[#1A4F9C] px-3 py-0.5 rounded-full">
+          GNSS Antenna
+        </span>
+
+        {/* Product name */}
+        <h1 className="text-[22px] font-bold text-[#111827] leading-snug">
+          {order.productName}
+        </h1>
+
+        {/* Rating */}
+        <div className="flex items-center gap-1.5">
+          <span className="text-[14px] font-semibold text-[#111827]">4.4</span>
+          <Star className="w-4 h-4 fill-[#1A4F9C] text-[#1A4F9C]" />
+          <span className="text-[13px] text-[#6B7280]">(400 Rating)</span>
         </div>
 
-        {/* Item */}
-        <Section title="Items">
-          <div className="flex items-center gap-3">
-            <img
-              src={order.productImage}
-              alt={order.productName}
-              className="w-16 h-20 rounded-lg object-cover bg-[#F5F5F7] shrink-0"
-            />
-            <div className="flex-1">
-              <p className="text-[13px] font-bold text-[#111827] leading-snug">{order.productName}</p>
-              <p className="text-[11px] text-[#6B7280] mt-1">Qty: {order.quantity}</p>
-              {order.serialNumber && <p className="text-[11px] text-[#6B7280] mt-0.5">S/N: {order.serialNumber}</p>}
-              <p className="text-sm font-bold text-[#1A4F9C] mt-1.5">{order.amountLabel}</p>
-            </div>
-          </div>
-        </Section>
+        {/* Price row */}
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="text-[22px] font-bold text-[#111827]">{order.amountLabel}</span>
+          <span className="text-[14px] text-[#9CA3AF] line-through">₹10,99,999</span>
+          <span className="text-[13px] font-semibold text-[#16A34A]">40% Off</span>
+        </div>
 
-        {/* Tracking */}
-        <Section title="Tracking">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <p className="text-[13px] font-bold text-[#111827]">{order.trackingCarrier}</p>
-              <p className="text-[11px] text-[#6B7280] mt-0.5">AWB: {order.trackingId}</p>
-            </div>
-            <button onClick={() => show("Opening carrier site...", "info")} className="text-xs font-semibold text-[#1A4F9C]">
-              Track Shipment ↗
+        {/* Book now banner */}
+        <InfoBanner
+          title={`Book this at just ${bookingAmount}`}
+          subtitle="Pay remaining amount after order confirmation"
+        />
+
+        {/* ── Tabs ── */}
+        <div className="flex border-b border-[#E5E7EB] mt-2 overflow-x-auto [&::-webkit-scrollbar]:hidden">
+          {TABS.map((t) => (
+            <button
+              key={t}
+              onClick={() => setTab(t)}
+              className={`shrink-0 px-4 py-3 text-[13px] font-medium border-b-2 transition-colors ${
+                tab === t
+                  ? "border-[#1A4F9C] text-[#1A4F9C] font-semibold"
+                  : "border-transparent text-[#6B7280]"
+              }`}
+            >
+              {t}
+            </button>
+          ))}
+        </div>
+
+        {/* Tab content */}
+        {tab === "Overview" && (
+          <div className="flex flex-col gap-4 pt-1">
+            <p className="text-[14px] text-[#374151] leading-relaxed">
+              &ldquo;Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
+              incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud
+              exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure
+              dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
+              Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt
+              mollit anim id est laborum.&rdquo;
+            </p>
+            <button className="w-full flex items-center gap-3 border border-[#E5E7EB] rounded-2xl p-4 text-left">
+              <div className="w-10 h-10 bg-[#EFF6FF] rounded-xl flex items-center justify-center shrink-0">
+                <ClipboardList className="w-5 h-5 text-[#1A4F9C]" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-[15px] font-bold text-[#111827]">Need a different price?</p>
+                <p className="text-[12px] text-[#6B7280] mt-0.5">Request Quote Adjustment</p>
+              </div>
+              <ChevronRight className="w-5 h-5 text-[#9CA3AF] shrink-0" />
             </button>
           </div>
-          <div className="pl-1 flex flex-col">
-            {timeline.map((t, i) => (
-              <div key={t.label} className="flex gap-3">
-                <div className="flex flex-col items-center">
-                  <div className={`w-4 h-4 rounded-full flex items-center justify-center shrink-0 ${t.done ? "bg-[#16A34A]" : "bg-[#E5E7EB]"}`}>
-                    {t.done && <CheckCircle className="w-2.5 h-2.5 text-white" />}
-                  </div>
-                  {i < timeline.length - 1 && (
-                    <div className={`w-0.5 flex-1 min-h-[20px] ${t.done ? "bg-[#16A34A]" : "bg-[#E5E7EB]"}`} />
-                  )}
-                </div>
-                <div className="pb-4">
-                  <p className={`text-xs font-semibold ${t.done ? "text-[#111827]" : "text-[#9CA3AF]"}`}>{t.label}</p>
-                  <p className="text-[10px] text-[#9CA3AF] mt-0.5">{t.date}</p>
-                </div>
+        )}
+
+        {tab === "Specifications" && (
+          <div className="border border-[#E5E7EB] rounded-xl overflow-hidden mt-1">
+            {[
+              { label: "Frequency Bands", value: "L1/L2/L5" },
+              { label: "Connector", value: "TNC Female" },
+              { label: "Gain", value: "40 dB typical" },
+              { label: "Operating Temp", value: "-40°C to +85°C" },
+              { label: "Dimensions", value: "Ø 185 × 67 mm" },
+              { label: "Weight", value: "680 g" },
+            ].map((s, i, arr) => (
+              <div
+                key={s.label}
+                className={`flex items-center justify-between px-3.5 py-2.5 ${
+                  i < arr.length - 1 ? "border-b border-[#E5E7EB]" : ""
+                } ${i % 2 === 0 ? "bg-white" : "bg-[#F9FAFB]"}`}
+              >
+                <span className="text-[12px] text-[#6B7280]">{s.label}</span>
+                <span className="text-[12px] font-semibold text-[#111827]">{s.value}</span>
               </div>
             ))}
           </div>
-        </Section>
+        )}
 
-        {/* Delivery address */}
-        <Section title="Delivery Address">
-          <p className="text-[13px] font-bold text-[#111827]">{user.address.fullName}</p>
-          <p className="text-xs text-[#6B7280] mt-1 leading-relaxed">
-            {user.address.line1}, {user.address.line2}<br />
-            {user.address.city}, {user.address.state} — {user.address.pincode}
-          </p>
-          <p className="text-xs font-semibold text-[#111827] mt-2">{user.address.phone}</p>
-        </Section>
-
-        {/* Payment */}
-        <Section title="Payment">
-          <PayRow label="Method" value={order.paymentMethod} />
-          <PayRow label="Transaction ID" value={order.transactionId} />
-          <div className="flex items-center justify-between pt-2 border-t border-[#E5E7EB] mt-1">
-            <span className="text-sm font-bold text-[#111827]">Total Paid</span>
-            <span className="text-sm font-bold text-[#1A4F9C]">{order.amountLabel}</span>
+        {tab === "Downloads" && (
+          <div className="flex flex-col gap-3 mt-1">
+            {[
+              { name: "Product Brochure", size: "2.4 MB", Icon: FileText },
+              { name: "Technical Datasheet", size: "1.1 MB", Icon: BarChart2 },
+            ].map(({ name, size, Icon }) => (
+              <div key={name} className="flex items-center gap-3 p-3.5 bg-white border border-[#E5E7EB] rounded-xl">
+                <div className="w-10 h-10 rounded-[10px] bg-[#FEE2E2] flex items-center justify-center shrink-0">
+                  <Icon className="w-5 h-5 text-[#DC2626]" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-[13px] font-semibold text-[#111827]">{name}</p>
+                  <p className="text-[11px] text-[#6B7280] mt-0.5">PDF · {size}</p>
+                </div>
+                <Download className="w-5 h-5 text-[#1A4F9C]" />
+              </div>
+            ))}
           </div>
-        </Section>
+        )}
 
-        {/* Sales rep */}
-        <Section title="Sales Rep">
-          <button
-            onClick={() => window.open(`tel:${salesRep.phone.replace(/\s/g, "")}`, "_self")}
-            className="flex items-center gap-3 w-full text-left"
-          >
-            <div className="w-10 h-10 rounded-full bg-[#1A4F9C] flex items-center justify-center shrink-0">
-              <span className="text-white font-bold text-sm">{salesRep.initials}</span>
+        {tab === "Reviews" && (
+          <div className="flex flex-col gap-3 mt-1">
+            {/* Summary row */}
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-1.5 bg-[#16A34A] text-white text-[13px] font-bold px-3 py-1.5 rounded-xl">
+                <span>4.5</span>
+                <Star className="w-3.5 h-3.5 fill-white text-white" />
+              </div>
+              <span className="text-[13px] text-[#374151] font-medium">68 Ratings | 6 Reviews</span>
             </div>
-            <div className="flex-1">
-              <p className="text-[13px] font-bold text-[#111827]">{salesRep.name}</p>
-              <p className="text-[11px] text-[#6B7280] mt-0.5">{salesRep.phone}</p>
-            </div>
-            <div className="w-9 h-9 rounded-full bg-[#16A34A] flex items-center justify-center">
-              <Phone className="w-4 h-4 text-white" />
-            </div>
-          </button>
-        </Section>
 
-        {/* Actions */}
-        <div className="flex flex-col gap-2.5">
-          <Button
-            label="Download GST Invoice"
-            variant="outlined"
-            onClick={() => show("Preparing invoice...", "info")}
-          />
-          {(canCancel || order.status === "Shipped") && (
-            <button
-              onClick={() => {
-                if (canCancel) show("Cancellation requested", "success");
-                else show("Cannot cancel a shipped order", "error");
-              }}
-              className={`h-[52px] rounded-lg border text-sm font-semibold transition-colors ${
-                canCancel
-                  ? "border-[#DC2626] text-[#DC2626]"
-                  : "border-[#E5E7EB] text-[#9CA3AF] opacity-60"
-              }`}
-            >
-              {canCancel ? "Cancel Order" : "Cannot Cancel (Shipped)"}
-            </button>
-          )}
+            {/* Horizontal scroll cards */}
+            <div className="flex gap-3 overflow-x-auto pb-1 -mx-4 px-4 [&::-webkit-scrollbar]:hidden">
+              {[
+                { name: "Samantha Payne", rating: 1.0, date: "23 Nov 2021", text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit ut aliquam, purus sit amet luctus venenatis, lectus magna fringilla urna, porttitor rhoncus dolor purus non e..." },
+                { name: "Rajan Mehta", rating: 4.5, date: "10 Jun 2026", text: "Excellent antenna, very accurate phase centre. Works perfectly with our Leica GS18. Highly recommend for any RTK application." },
+                { name: "Sonal Patel", rating: 5.0, date: "22 May 2026", text: "Solid build, IP67 rating gives confidence in the field. Fast lock-on, stable signal. Worth every rupee." },
+              ].map((r) => (
+                <div key={r.name} className="shrink-0 w-64 border border-[#E5E7EB] rounded-2xl p-4 bg-white">
+                  <div className="flex items-start justify-between gap-2 mb-1">
+                    <p className="text-[13px] font-bold text-[#111827] leading-snug">{r.name}</p>
+                    <div className="flex items-center gap-1 bg-accent text-white text-[11px] font-bold px-2 py-0.5 rounded-lg shrink-0">
+                      <span>{r.rating.toFixed(1)}</span>
+                      <Star className="w-3 h-3 fill-white text-white" />
+                    </div>
+                  </div>
+                  <p className="text-[11px] text-[#9CA3AF] mb-2">{r.date}</p>
+                  <p className="text-[12px] text-[#374151] leading-relaxed line-clamp-4">{r.text}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* ── Always visible: More Product Like This ── */}
+        <div className="flex items-center gap-3 mt-4">
+          <hr className="flex-1 border-[#E5E7EB]" />
+          <span className="text-[11px] font-bold text-[#9CA3AF] tracking-widest uppercase whitespace-nowrap">
+            More Product Like This
+          </span>
+          <hr className="flex-1 border-[#E5E7EB]" />
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          {products.slice(0, 4).map((p) => (
+            <FeaturedCard key={p.id} product={p} />
+          ))}
         </div>
       </div>
-    </div>
-  );
-}
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <div>
-      <p className="text-[13px] font-bold text-[#111827] mb-2">{title}</p>
-      <div className="bg-white border border-[#E5E7EB] rounded-xl p-3.5">{children}</div>
-    </div>
-  );
-}
-
-function PayRow({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex items-center justify-between py-1.5">
-      <span className="text-xs text-[#6B7280]">{label}</span>
-      <span className="text-xs font-semibold text-[#111827]">{value}</span>
+      {/* ── Sticky bottom actions ── */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-[#E5E7EB] px-4 py-3 pb-5 flex gap-3 z-20">
+        <button className="flex-1 h-12 bg-accent text-white text-[15px] font-semibold rounded-xl">
+          Buy Now
+        </button>
+        <button className="flex-1 h-12 border border-accent text-accent text-[15px] font-semibold rounded-xl bg-white">
+          Add To Cart
+        </button>
+      </div>
     </div>
   );
 }

@@ -13,7 +13,7 @@ const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
 
 export default function ShopByCategory() {
   return (
-    <section className="max-w-7xl mx-auto px-4 md:px-6 py-6 md:py-14">
+    <section className="max-w-7xl mx-auto px-4 py-6 md:py-14">
 
       {/* Mobile header */}
       <div className="flex items-center justify-between mb-4 md:hidden">
@@ -34,20 +34,29 @@ export default function ShopByCategory() {
         </p>
       </div>
 
-      {/* Mobile grid: 2 columns, icon centered, label below */}
-      <div className="grid grid-cols-2 gap-3 md:hidden">
+      {/* Mobile: horizontal scroll row with product images */}
+      <div className="flex gap-3 overflow-x-auto pb-2 md:hidden [&::-webkit-scrollbar]:hidden">
         {categories.map((cat) => {
-          const Icon = ICON_MAP[cat.icon];
+          const repImage = products.find((p) => p.categoryKey === cat.key)?.images?.[0];
           return (
             <Link
               key={cat.key}
               href={`/explore?cat=${cat.key}`}
-              className="border border-[#E5E7EB] rounded-2xl p-4 flex flex-col items-center gap-3 active:bg-[#F9FAFB] transition-colors"
+              className="flex flex-col items-center gap-2 shrink-0 w-40"
             >
-              <div className="w-14 h-14 rounded-full bg-[#E8F0FB] flex items-center justify-center">
-                {Icon && <Icon className="w-6 h-6 text-[#1A4F9C]" />}
+              <div className="w-40 h-40 rounded-2xl bg-[#F3F4F6] flex items-center justify-center overflow-hidden">
+                {repImage ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={repImage}
+                    alt={cat.label}
+                    className="w-full h-full object-contain p-3"
+                  />
+                ) : (
+                  <span className="text-[#9CA3AF] text-xs">No image</span>
+                )}
               </div>
-              <p className="text-[13px] font-semibold text-[#111827] text-center leading-tight">
+              <p className="text-[14px] font-bold text-[#111827] text-center leading-tight">
                 {cat.label}
               </p>
             </Link>

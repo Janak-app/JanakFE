@@ -29,7 +29,7 @@ const PILLARS = [
 
 export default function WhyJanak() {
   return (
-    <section className="max-w-7xl mx-auto px-6 py-14">
+    <section className="max-w-7xl mx-auto px-4 py-14">
       <h2 className="text-3xl font-extrabold text-[#111827] mb-1">Why Janak Positioning</h2>
       <p className="text-sm text-[#6B7280] mb-10">
         Built on four decades of trust, precision &amp; service excellence.

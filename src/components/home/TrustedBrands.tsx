@@ -9,7 +9,7 @@ const loopedBrands = [...brands, ...brands];
 export default function TrustedBrands() {
   return (
     <section className="border-y border-[#E5E7EB] py-8 bg-white overflow-hidden">
-      <div className="max-w-7xl mx-auto px-6 flex flex-col items-center gap-4">
+      <div className="max-w-7xl mx-auto px-4 flex flex-col items-center gap-4">
         <p className="text-[10px] font-bold tracking-[3px] text-[#9CA3AF] uppercase">
           Trusted by the world&apos;s leading survey brands
         </p>

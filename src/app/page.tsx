@@ -2,7 +2,7 @@
 
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
-import ProductCard from "@/components/products/ProductCard";
+import FeaturedCard from "@/components/products/FeaturedCard";
 import HeroBanner from "@/components/home/HeroBanner";
 import TrustedBrands from "@/components/home/TrustedBrands";
 import WhyJanak from "@/components/home/WhyJanak";
@@ -62,8 +62,8 @@ export default function HomePage() {
           </div>
           <div className="flex gap-3 overflow-x-auto px-4 pb-2 [&::-webkit-scrollbar]:hidden">
             {newArrivals.map((p) => (
-              <div key={p.id} className="w-52 shrink-0">
-                <ProductCard product={p} />
+              <div key={p.id} className="w-56 shrink-0">
+                <FeaturedCard product={p} />
               </div>
             ))}
           </div>

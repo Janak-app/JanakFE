@@ -17,5 +17,8 @@ export function usePaymentInitiate() {
   return useMutationApi<PaymentInitiateResponse, PaymentInitiatePayload>({
     method: "post",
     endpoint: "v1/payments/initiate",
+    headers: {
+      "ngrok-skip-browser-warning": "true",
+    }
   });
 }

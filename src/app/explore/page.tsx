@@ -6,7 +6,7 @@ import { useSearchParams } from "next/navigation";
 import { Search, SlidersHorizontal, ChevronDown, X, Loader2 } from "lucide-react";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
-import ProductCard from "@/components/products/ProductCard";
+import FeaturedCard from "@/components/products/FeaturedCard";
 import Button from "@/components/ui/Button";
 import useProducts, { ProductFilters } from "@/hooks/useProducts";
 import useCategories from "@/hooks/useCategories";
@@ -25,7 +25,6 @@ function ExploreContent() {
   const [searchInput, setSearchInput] = useState("");
   const [showFilter, setShowFilter] = useState(false);
 
-  // Filter modal state
   const [brand, setBrand] = useState("");
   const [inStock, setInStock] = useState(false);
   const [minPrice, setMinPrice] = useState<number | undefined>(undefined);
@@ -62,10 +61,65 @@ function ExploreContent() {
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
-      <Header />
 
-      {/* Page hero */}
-      <div className="bg-[#F5F5F7] border-b border-[#E5E7EB] py-10">
+      {/* ── Desktop header ── */}
+      <div className="hidden md:block">
+        <Header />
+      </div>
+
+      {/* ── Mobile top section ── */}
+      <div className="md:hidden px-4 pt-5 pb-3 flex flex-col gap-3">
+        {/* Title */}
+        <h1 className="text-[22px] font-bold text-[#111827]">Explore</h1>
+
+        {/* Search */}
+        <div className="flex items-center gap-2 h-11 bg-white border border-[#E5E7EB] rounded-full px-4">
+          <Search className="w-4 h-4 text-[#9CA3AF] shrink-0" />
+          <input
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            placeholder="Search Product"
+            className="flex-1 text-sm bg-transparent outline-none text-[#111827] placeholder:text-[#9CA3AF]"
+          />
+          {searchInput && (
+            <button onClick={() => setSearchInput("")}>
+              <X className="w-4 h-4 text-[#9CA3AF]" />
+            </button>
+          )}
+        </div>
+
+        {/* Filter icon + Category chips */}
+        <div className="flex items-center gap-2 overflow-x-auto [&::-webkit-scrollbar]:hidden">
+          {/* Filter button */}
+          <button
+            onClick={() => setShowFilter(true)}
+            className="w-9 h-9 flex items-center justify-center border border-[#E5E7EB] rounded-xl shrink-0"
+          >
+            <SlidersHorizontal className="w-4 h-4 text-[#6B7280]" />
+          </button>
+
+          {/* Category chips */}
+          {tabs.map((t) => {
+            const active = tab === t.key;
+            return (
+              <button
+                key={t.key}
+                onClick={() => setTab(t.key)}
+                className={`px-4 py-1.5 rounded-full text-[13px] font-medium whitespace-nowrap shrink-0 transition-colors ${
+                  active
+                    ? "bg-[#1A4F9C] text-white"
+                    : "bg-white text-[#6B7280] border border-[#E5E7EB]"
+                }`}
+              >
+                {t.label}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* ── Desktop page hero ── */}
+      <div className="hidden md:block bg-[#F5F5F7] border-b border-[#E5E7EB] py-10">
         <div className="max-w-7xl mx-auto px-6">
           <p className="text-xs font-medium text-[#6B7280] tracking-wide mb-2">Home / Catalog</p>
           <h1 className="text-4xl font-bold text-[#111827] tracking-tight">Browse Survey Equipment</h1>
@@ -81,10 +135,9 @@ function ExploreContent() {
         </div>
       </div>
 
-      {/* Filter bar */}
-      <div className="bg-white border-b border-[#E5E7EB] py-4">
+      {/* ── Desktop filter bar ── */}
+      <div className="hidden md:block bg-white border-b border-[#E5E7EB] py-4">
         <div className="max-w-7xl mx-auto px-6 flex items-center gap-3 flex-wrap">
-          {/* Search */}
           <div className="flex items-center gap-2 h-10 bg-[#F5F5F7] border border-[#E5E7EB] rounded-lg px-3 flex-1 max-w-96">
             <Search className="w-4 h-4 text-[#6B7280] shrink-0" />
             <input
@@ -100,7 +153,6 @@ function ExploreContent() {
             )}
           </div>
 
-          {/* Category chips */}
           <div className="flex items-center gap-2 flex-wrap">
             {tabs.map((t) => {
               const active = tab === t.key;
@@ -120,7 +172,6 @@ function ExploreContent() {
             })}
           </div>
 
-          {/* Filters + Sort */}
           <button
             onClick={() => setShowFilter(true)}
             className="flex items-center gap-2 h-10 px-4 rounded-lg border border-[#E5E7EB] bg-white text-[13px] font-semibold text-[#1A4F9C] hover:bg-[#F5F5F7] transition-colors ml-auto"
@@ -136,9 +187,15 @@ function ExploreContent() {
         </div>
       </div>
 
-      {/* Grid */}
-      <div className="flex-1 bg-[#F5F5F7] py-8">
-        <div className="max-w-7xl mx-auto px-6">
+      {/* ── Product grid ── */}
+      <div className="flex-1 md:bg-[#F5F5F7] py-4 md:py-8">
+        <div className="max-w-7xl mx-auto px-4 md:px-6">
+          {loading && (
+            <div className="flex items-center justify-center gap-2 py-10 text-sm text-[#6B7280] md:hidden">
+              <Loader2 className="w-4 h-4 animate-spin" />
+              Loading...
+            </div>
+          )}
           {products.length === 0 && !loading ? (
             <div className="text-center py-20">
               <Search className="w-12 h-12 text-[#9CA3AF] mx-auto mb-4" />
@@ -146,29 +203,28 @@ function ExploreContent() {
               <p className="text-sm text-[#6B7280] mt-1">Try a different search or category</p>
             </div>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-5">
               {products.map((p) => (
-                <ProductCard key={p.id} product={p} />
+                <FeaturedCard key={p.id} product={p} />
               ))}
             </div>
           )}
         </div>
       </div>
 
-      <Footer />
+      {/* ── Desktop footer ── */}
+      <div className="hidden md:block">
+        <Footer />
+      </div>
 
-      {/* Filter modal */}
+      {/* ── Filter modal ── */}
       {showFilter && (
         <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center">
-          <div
-            className="absolute inset-0 bg-black/50"
-            onClick={() => setShowFilter(false)}
-          />
+          <div className="absolute inset-0 bg-black/50" onClick={() => setShowFilter(false)} />
           <div className="relative bg-white w-full md:w-[480px] rounded-t-2xl md:rounded-2xl p-5 pb-8 max-h-[85vh] overflow-y-auto">
             <div className="w-10 h-1 bg-[#E5E7EB] rounded mx-auto mb-4 md:hidden" />
             <h2 className="text-lg font-bold text-[#111827] mb-4">Filters</h2>
 
-            {/* Brand */}
             <div className="flex items-center justify-between py-3.5 border-b border-[#E5E7EB]">
               <span className="text-sm font-medium text-[#111827]">Brand</span>
               <input
@@ -180,7 +236,6 @@ function ExploreContent() {
               />
             </div>
 
-            {/* Stock Availability */}
             <div className="flex items-center justify-between py-3.5 border-b border-[#E5E7EB]">
               <span className="text-sm font-medium text-[#111827]">Stock Availability</span>
               <label className="flex items-center gap-2 text-sm text-[#6B7280] cursor-pointer">
@@ -194,7 +249,6 @@ function ExploreContent() {
               </label>
             </div>
 
-            {/* Price Range */}
             <div className="flex items-center justify-between py-3.5 border-b border-[#E5E7EB]">
               <span className="text-sm font-medium text-[#111827]">Price Range</span>
               <div className="flex items-center gap-2">
@@ -216,15 +270,8 @@ function ExploreContent() {
               </div>
             </div>
 
-            {/* Non-functional rows */}
-            {[
-              { label: "Accuracy Rating", value: "Any" },
-              { label: "Warranty", value: "Any" },
-            ].map((f) => (
-              <div
-                key={f.label}
-                className="flex items-center justify-between py-3.5 border-b border-[#E5E7EB]"
-              >
+            {[{ label: "Accuracy Rating", value: "Any" }, { label: "Warranty", value: "Any" }].map((f) => (
+              <div key={f.label} className="flex items-center justify-between py-3.5 border-b border-[#E5E7EB]">
                 <span className="text-sm font-medium text-[#111827]">{f.label}</span>
                 <div className="flex items-center gap-1.5 text-sm text-[#6B7280]">
                   {f.value}
@@ -235,10 +282,7 @@ function ExploreContent() {
 
             <div className="mt-4 flex flex-col gap-2">
               <Button label="Apply Filters" onClick={() => setShowFilter(false)} />
-              <button
-                onClick={handleClearFilters}
-                className="text-[13px] font-medium text-[#DC2626] py-3 text-center"
-              >
+              <button onClick={handleClearFilters} className="text-[13px] font-medium text-[#DC2626] py-3 text-center">
                 Clear All
               </button>
             </div>

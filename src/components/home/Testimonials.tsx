@@ -37,7 +37,7 @@ function Stars() {
 export default function Testimonials() {
   return (
     <section className="bg-[#F5F5F7] py-16">
-      <div className="max-w-7xl mx-auto px-6">
+      <div className="max-w-7xl mx-auto px-4">
         <h2 className="text-3xl font-extrabold text-[#111827] mb-10">
           Trusted by India&apos;s leading survey teams
         </h2>

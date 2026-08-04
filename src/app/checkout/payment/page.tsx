@@ -46,7 +46,7 @@ export default function CheckoutPaymentPage() {
           paymentInitiateMutation.mutate(
             {
               orderId: order.orderId,
-              customerName: user.email,   // TODO: replace with real name once available
+              customerName: "Vinay Bachani",
               customerEmail: user.email,
               customerMobile: "919999999999", // TODO: replace with real mobile once available
             },

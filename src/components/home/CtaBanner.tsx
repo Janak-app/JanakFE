@@ -3,7 +3,7 @@ import { ArrowRight, MessageCircle } from "lucide-react";
 
 export default function CtaBanner() {
   return (
-    <section className="max-w-7xl mx-auto px-6 py-12">
+    <section className="max-w-7xl mx-auto px-4 py-12">
       <div
         className="rounded-2xl px-8 py-10 flex flex-col md:flex-row items-center justify-between gap-8"
         style={{ background: "linear-gradient(135deg, #1A4F9C 0%, #2563EB 50%, #38BDF8 100%)" }}

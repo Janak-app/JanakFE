@@ -23,7 +23,7 @@ function AuthGuard({ children }: { children: ReactNode }) {
     }
   }, [loading, user, isPublic, router]);
 
-  if (loading) return null;
+  if (loading && !isPublic) return null;
   if (!user && !isPublic) return null;
 
   return <>{children}</>;

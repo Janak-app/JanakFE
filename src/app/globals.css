@@ -10,6 +10,7 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-accent: #943C3C;
   --color-primary: #1A4F9C;
   --color-primary-dark: #143E7A;
   --color-secondary: #0EA5E9;

@@ -107,14 +107,14 @@ export default function ChatPage() {
               className={`flex items-end gap-2 ${m.from === "user" ? "justify-end" : "justify-start"}`}
             >
               {m.from === "rep" && (
-                <div className="w-7 h-7 rounded-full bg-[#1A4F9C] flex items-center justify-center shrink-0 mb-1">
+                <div className="w-7 h-7 rounded-full bg-accent flex items-center justify-center shrink-0 mb-1">
                   <span className="text-white text-[10px] font-bold">{salesRep.initials}</span>
                 </div>
               )}
               <div
                 className={`max-w-[72%] px-4 py-3 rounded-2xl ${
                   m.from === "user"
-                    ? "bg-[#1A4F9C] rounded-br-sm"
+                    ? "bg-accent rounded-br-sm"
                     : "bg-white border border-[#E5E7EB] rounded-bl-sm"
                 }`}
               >
@@ -136,7 +136,7 @@ export default function ChatPage() {
             <button
               key={q}
               onClick={() => setText(q)}
-              className="shrink-0 px-3 py-1.5 bg-white border border-[#E5E7EB] rounded-full text-[12px] font-medium text-[#1A4F9C] hover:bg-[#F5F5F7] transition-colors"
+              className="shrink-0 px-3 py-1.5 bg-white border border-[#E5E7EB] rounded-full text-[12px] font-medium text-accent hover:bg-[#F5F5F7] transition-colors"
             >
               {q}
             </button>
@@ -158,7 +158,7 @@ export default function ChatPage() {
           <button
             onClick={send}
             disabled={!text.trim()}
-            className="w-9 h-9 rounded-full bg-[#1A4F9C] flex items-center justify-center disabled:opacity-40 transition-opacity"
+            className="w-9 h-9 rounded-full bg-accent flex items-center justify-center disabled:opacity-40 transition-opacity"
           >
             <Send className="w-4 h-4 text-white" />
           </button>

@@ -23,6 +23,7 @@ type CartContextType = {
   removeItem: (productId: string) => void;
   updateQty: (productId: string, qty: number) => void;
   clearCart: () => void;
+  refetchCart: () => void;
   cartCount: number;
   subtotal: number;
   gst: number;
@@ -41,8 +42,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
   // per-item debounce timers so rapid +/- clicks collapse into one API call
   const updateTimers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
 
-  const { data: cartData, loading: cartLoading } = useFetchApi<ApiCart>({
+  const { data: cartData, loading: cartLoading, retrieve: refetchCart } = useFetchApi<ApiCart>({
     endpoint: "/v1/cart",
+    cacheEnabled: false,
   });
 
   // Seed local state from server on first load
@@ -163,7 +165,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   return (
     <CartContext.Provider
-      value={{ items, serverItems, addItem, removeItem, updateQty, clearCart, cartCount, subtotal, gst, total, cartLoading }}
+      value={{ items, serverItems, addItem, removeItem, updateQty, clearCart, refetchCart, cartCount, subtotal, gst, total, cartLoading }}
     >
       {children}
     </CartContext.Provider>

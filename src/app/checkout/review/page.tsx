@@ -68,7 +68,7 @@ export default function CheckoutReviewPage() {
         <Card title="Payment Method" onEdit={() => router.push("/checkout/payment")}>
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-lg bg-[#E0F2FE] flex items-center justify-center">
-              <Smartphone className="w-4.5 h-4.5 text-[#1A4F9C]" />
+              <Smartphone className="w-4.5 h-4.5 text-accent" />
             </div>
             <div>
               <p className="text-[13px] font-semibold text-[#111827]">UPI</p>
@@ -85,19 +85,19 @@ export default function CheckoutReviewPage() {
           <div className="h-px bg-[#E5E7EB] my-2" />
           <div className="flex items-center justify-between">
             <span className="text-sm font-bold text-[#111827]">Grand Total</span>
-            <span className="text-lg font-bold text-[#1A4F9C]">{formatINR(Math.round(total))}</span>
+            <span className="text-lg font-bold text-accent">{formatINR(Math.round(total))}</span>
           </div>
         </Card>
 
         {/* T&C */}
         <button onClick={() => setAgree(!agree)} className="flex items-center gap-2.5 py-3 text-left">
-          <div className={`w-5 h-5 rounded border-2 flex items-center justify-center shrink-0 ${agree ? "bg-[#1A4F9C] border-[#1A4F9C]" : "border-[#D1D5DB]"}`}>
+          <div className={`w-5 h-5 rounded border-2 flex items-center justify-center shrink-0 ${agree ? "bg-accent border-accent" : "border-[#D1D5DB]"}`}>
             {agree && <Check className="w-3 h-3 text-white" />}
           </div>
           <p className="text-xs text-[#6B7280] leading-relaxed">
             I agree to the{" "}
-            <span className="text-[#1A4F9C] font-semibold">Terms & Conditions</span> and{" "}
-            <span className="text-[#1A4F9C] font-semibold">Privacy Policy</span>.
+            <span className="text-accent font-semibold">Terms & Conditions</span> and{" "}
+            <span className="text-accent font-semibold">Privacy Policy</span>.
           </p>
         </button>
       </div>
@@ -123,7 +123,7 @@ function Card({ title, children, onEdit }: { title: string; children: React.Reac
       <div className="flex items-center justify-between mb-3">
         <p className="text-[13px] font-bold text-[#111827]">{title}</p>
         {onEdit && (
-          <button onClick={onEdit} className="text-xs font-semibold text-[#1A4F9C]">Edit</button>
+          <button onClick={onEdit} className="text-xs font-semibold text-accent">Edit</button>
         )}
       </div>
       {children}

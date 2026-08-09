@@ -26,8 +26,8 @@ export default function Button({
   const base =
     "h-[52px] rounded-lg flex items-center justify-center px-5 font-semibold text-[15px] tracking-wide transition-colors";
   const variants = {
-    primary: "bg-[#1A4F9C] text-white hover:bg-[#143E7A] disabled:opacity-50",
-    outlined: "bg-white text-[#1A4F9C] border border-[#1A4F9C] hover:bg-[#F5F5F7] disabled:opacity-50",
+    primary: "bg-accent text-white hover:bg-accent/90 disabled:opacity-50",
+    outlined: "bg-white text-accent border border-accent hover:bg-[#F5F5F7] disabled:opacity-50",
     danger: "bg-[#DC2626] text-white hover:bg-[#B91C1C] disabled:opacity-50",
   };
 

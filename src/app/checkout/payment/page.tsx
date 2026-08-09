@@ -30,7 +30,12 @@ export default function CheckoutPaymentPage() {
     setAddressId(localStorage.getItem("checkoutAddressId") ?? "");
   }, []);
 
-  const { items, serverItems, subtotal, gst, total } = useCart();
+  const { items, serverItems, subtotal, gst, total, refetchCart } = useCart();
+
+  useEffect(() => {
+    refetchCart();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   const { user } = useAuth();
   const placeOrderMutation = usePlaceOrder();
   const paymentInitiateMutation = usePaymentInitiate();
@@ -49,6 +54,7 @@ export default function CheckoutPaymentPage() {
               customerName: "Vinay Bachani",
               customerEmail: user.email,
               customerMobile: "919999999999", // TODO: replace with real mobile once available
+              returnUrl: `${window.location.origin}/payment-result`,
             },
             {
               onSuccess: (payment) => {
@@ -117,7 +123,7 @@ export default function CheckoutPaymentPage() {
             <div className="h-px bg-[#E5E7EB] my-2" />
             <div className="flex items-center justify-between">
               <span className="text-sm font-bold text-[#111827]">Grand Total</span>
-              <span className="text-base font-bold text-[#1A4F9C]">{formatINR(Math.round(total))}</span>
+              <span className="text-base font-bold text-accent">{formatINR(Math.round(total))}</span>
             </div>
           </div>
         </div>
@@ -134,18 +140,18 @@ export default function CheckoutPaymentPage() {
                 key={key}
                 onClick={() => setMethod(key)}
                 className={`flex items-center gap-3 p-3.5 rounded-xl border text-left transition-colors ${
-                  active ? "border-[#1A4F9C] bg-[#EFF6FF]" : "border-[#E5E7EB] bg-white"
+                  active ? "border-accent bg-[#EFF6FF]" : "border-[#E5E7EB] bg-white"
                 }`}
               >
                 <div
                   className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${
-                    active ? "border-[#1A4F9C]" : "border-[#D1D5DB]"
+                    active ? "border-accent" : "border-[#D1D5DB]"
                   }`}
                 >
-                  {active && <div className="w-2.5 h-2.5 rounded-full bg-[#1A4F9C]" />}
+                  {active && <div className="w-2.5 h-2.5 rounded-full bg-accent" />}
                 </div>
                 <div className="w-9 h-9 rounded-lg bg-[#E0F2FE] flex items-center justify-center shrink-0">
-                  <Icon className="w-5 h-5 text-[#1A4F9C]" />
+                  <Icon className="w-5 h-5 text-accent" />
                 </div>
                 <div className="flex-1">
                   <p className="text-sm font-semibold text-[#111827]">{label}</p>

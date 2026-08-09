@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import type { Product } from "@/data/products";
 
 export default function FeaturedCard({ product }: { product: Product }) {
@@ -8,13 +9,15 @@ export default function FeaturedCard({ product }: { product: Product }) {
       className="group flex flex-col border border-[#E5E7EB] rounded-2xl overflow-hidden bg-white"
     >
       {/* Image */}
-      <div className="h-48 bg-[#F3F4F6] flex items-center justify-center overflow-hidden">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={product.images[0]}
-          alt={product.name}
-          className="w-full h-full object-contain p-4 group-hover:scale-105 transition-transform duration-300"
-        />
+      <div className="relative h-48 bg-[#F3F4F6] overflow-hidden">
+        {product.images[0] && (
+          <Image
+            src={`/api/img?url=${encodeURIComponent(product.images[0])}`}
+            alt={product.name}
+            fill
+            className="object-contain p-4 group-hover:scale-105 transition-transform duration-300"
+          />
+        )}
       </div>
 
       {/* Body */}
@@ -26,9 +29,9 @@ export default function FeaturedCard({ product }: { product: Product }) {
           {product.name}
         </p>
         {product.price ? (
-          <p className="text-[16px] font-bold text-[#1A4F9C]">{product.priceLabel}</p>
+          <p className="text-[16px] font-bold text-accent">{product.priceLabel}</p>
         ) : (
-          <p className="text-[14px] font-semibold text-[#1A4F9C]">Price on Request</p>
+          <p className="text-[14px] font-semibold text-accent">Price on Request</p>
         )}
       </div>
     </Link>

@@ -49,7 +49,7 @@ export default function NotificationsPage() {
       <div className="max-w-3xl mx-auto px-4 py-4">
         {/* Summary */}
         <div className="flex items-center gap-3 p-4 bg-[#EFF6FF] border border-[#DBEAFE] rounded-xl mb-5">
-          <div className="w-10 h-10 rounded-full bg-[#1A4F9C] flex items-center justify-center shrink-0">
+          <div className="w-10 h-10 rounded-full bg-accent flex items-center justify-center shrink-0">
             <Bell className="w-5 h-5 text-white" />
           </div>
           <div>
@@ -67,7 +67,7 @@ export default function NotificationsPage() {
               className={`flex items-center gap-3 px-3.5 py-3.5 ${idx < PREFS.length - 1 ? "border-b border-[#E5E7EB]" : ""}`}
             >
               <div className="w-8 h-8 rounded-[10px] bg-[#E0F2FE] flex items-center justify-center shrink-0">
-                <Icon className="w-4 h-4 text-[#1A4F9C]" />
+                <Icon className="w-4 h-4 text-accent" />
               </div>
               <div className="flex-1">
                 <p className="text-[13px] font-semibold text-[#111827]">{label}</p>
@@ -76,7 +76,7 @@ export default function NotificationsPage() {
               {/* Toggle */}
               <button
                 onClick={() => toggle(key)}
-                className={`relative w-12 h-6 rounded-full transition-colors shrink-0 ${state[key] ? "bg-[#1A4F9C]" : "bg-[#D1D5DB]"}`}
+                className={`relative w-12 h-6 rounded-full transition-colors shrink-0 ${state[key] ? "bg-accent" : "bg-[#D1D5DB]"}`}
               >
                 <div
                   className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${state[key] ? "translate-x-6" : "translate-x-0.5"}`}

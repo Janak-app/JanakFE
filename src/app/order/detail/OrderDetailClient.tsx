@@ -88,7 +88,7 @@ export default function OrderDetailClient() {
       <div className="px-4 pt-4 flex flex-col gap-3 pb-28">
 
         {/* Category pill */}
-        <span className="self-start text-[12px] font-semibold text-[#1A4F9C] border border-[#1A4F9C] px-3 py-0.5 rounded-full">
+        <span className="self-start text-[12px] font-semibold text-accent border border-accent px-3 py-0.5 rounded-full">
           GNSS Antenna
         </span>
 
@@ -100,7 +100,7 @@ export default function OrderDetailClient() {
         {/* Rating */}
         <div className="flex items-center gap-1.5">
           <span className="text-[14px] font-semibold text-[#111827]">4.4</span>
-          <Star className="w-4 h-4 fill-[#1A4F9C] text-[#1A4F9C]" />
+          <Star className="w-4 h-4 fill-[#1A4F9C] text-accent" />
           <span className="text-[13px] text-[#6B7280]">(400 Rating)</span>
         </div>
 
@@ -125,7 +125,7 @@ export default function OrderDetailClient() {
               onClick={() => setTab(t)}
               className={`shrink-0 px-4 py-3 text-[13px] font-medium border-b-2 transition-colors ${
                 tab === t
-                  ? "border-[#1A4F9C] text-[#1A4F9C] font-semibold"
+                  ? "border-accent text-accent font-semibold"
                   : "border-transparent text-[#6B7280]"
               }`}
             >
@@ -147,7 +147,7 @@ export default function OrderDetailClient() {
             </p>
             <button className="w-full flex items-center gap-3 border border-[#E5E7EB] rounded-2xl p-4 text-left">
               <div className="w-10 h-10 bg-[#EFF6FF] rounded-xl flex items-center justify-center shrink-0">
-                <ClipboardList className="w-5 h-5 text-[#1A4F9C]" />
+                <ClipboardList className="w-5 h-5 text-accent" />
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-[15px] font-bold text-[#111827]">Need a different price?</p>
@@ -195,7 +195,7 @@ export default function OrderDetailClient() {
                   <p className="text-[13px] font-semibold text-[#111827]">{name}</p>
                   <p className="text-[11px] text-[#6B7280] mt-0.5">PDF · {size}</p>
                 </div>
-                <Download className="w-5 h-5 text-[#1A4F9C]" />
+                <Download className="w-5 h-5 text-accent" />
               </div>
             ))}
           </div>

@@ -2,6 +2,6 @@
 <resources>
     <string name="app_name">Janak</string>
     <string name="title_activity_main">Janak</string>
-    <string name="package_name">com.janakpositioning.app</string>
-    <string name="custom_url_scheme">com.janakpositioning.app</string>
+    <string name="package_name">com.janakpositioning.janakglobal</string>
+    <string name="custom_url_scheme">com.janakpositioning.janakglobal</string>
 </resources>

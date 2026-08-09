@@ -37,7 +37,7 @@ export default function OrdersPage() {
                 onClick={() => setFilter(f)}
                 className={`shrink-0 px-3.5 py-2 rounded-full text-xs font-medium border transition-colors ${
                   active
-                    ? "bg-[#1A4F9C] text-white border-[#1A4F9C]"
+                    ? "bg-accent text-white border-accent"
                     : "bg-white text-[#6B7280] border-[#E5E7EB]"
                 }`}
               >
@@ -88,7 +88,7 @@ function OrderCard({ order }: { order: Order }) {
         <div className="flex-1 min-w-0">
           <p className="text-[13px] font-semibold text-[#111827] leading-snug line-clamp-2">{order.productName}</p>
           <p className="text-xs text-[#6B7280] mt-1">Qty: {order.quantity}</p>
-          <p className="text-[15px] font-bold text-[#1A4F9C] mt-1">{order.amountLabel}</p>
+          <p className="text-[15px] font-bold text-accent mt-1">{order.amountLabel}</p>
         </div>
         <ChevronRight className="w-4.5 h-4.5 text-[#9CA3AF] shrink-0" />
       </div>

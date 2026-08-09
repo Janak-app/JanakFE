@@ -42,7 +42,7 @@ export default function WhyJanak() {
             className="border border-[#E5E7EB] rounded-2xl p-6 flex flex-col gap-5 hover:shadow-md transition-shadow"
           >
             <div className="w-12 h-12 rounded-xl bg-[#E0EAF7] flex items-center justify-center">
-              <Icon className="w-6 h-6 text-[#1A4F9C]" />
+              <Icon className="w-6 h-6 text-accent" />
             </div>
             <div>
               <p className="text-[15px] font-bold text-[#111827] mb-1.5">{title}</p>

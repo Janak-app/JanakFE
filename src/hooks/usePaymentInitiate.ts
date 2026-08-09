@@ -11,6 +11,7 @@ interface PaymentInitiatePayload extends DynamicMutationPayload {
   customerName: string;
   customerEmail: string;
   customerMobile: string;
+  returnUrl?: string;
 }
 
 export function usePaymentInitiate() {

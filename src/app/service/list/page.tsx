@@ -19,7 +19,7 @@ export default function ServiceListPage() {
           </div>
           <Link
             href="/service/book"
-            className="w-9 h-9 rounded-full bg-[#1A4F9C] flex items-center justify-center"
+            className="w-9 h-9 rounded-full bg-accent flex items-center justify-center"
           >
             <Plus className="w-5 h-5 text-white" />
           </Link>

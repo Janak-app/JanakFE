@@ -29,9 +29,9 @@ export default function ProductCard({ product, hidePrice }: Props) {
         </span>
         <div className="flex items-center justify-between mt-1 gap-2">
           {hidePrice ? (
-            <span className="text-sm font-bold text-[#1A4F9C]">Login to view price</span>
+            <span className="text-sm font-bold text-accent">Login to view price</span>
           ) : product.price ? (
-            <span className="text-sm font-bold text-[#1A4F9C]">{product.priceLabel}</span>
+            <span className="text-sm font-bold text-accent">{product.priceLabel}</span>
           ) : (
             <span className="bg-[#E0F2FE] text-[#0EA5E9] text-[11px] font-semibold px-2 py-0.5 rounded">
               Get Quote

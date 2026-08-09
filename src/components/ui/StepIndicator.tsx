@@ -15,14 +15,14 @@ export default function StepIndicator({ current, steps }: Props) {
             <div className="flex flex-col items-center">
               <div
                 className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold mb-1.5 ${
-                  active ? "bg-[#1A4F9C] text-white" : "bg-[#E5E7EB] text-[#6B7280]"
+                  active ? "bg-accent text-white" : "bg-[#E5E7EB] text-[#6B7280]"
                 }`}
               >
                 {stepNum}
               </div>
               <span
                 className={`text-[11px] font-medium text-center leading-none ${
-                  active ? "text-[#1A4F9C]" : "text-[#6B7280]"
+                  active ? "text-accent" : "text-[#6B7280]"
                 }`}
               >
                 {label}
@@ -31,7 +31,7 @@ export default function StepIndicator({ current, steps }: Props) {
             {!isLast && (
               <div
                 className={`flex-1 h-0.5 mt-3.5 mx-1 ${
-                  stepNum < current ? "bg-[#1A4F9C]" : "bg-[#E5E7EB]"
+                  stepNum < current ? "bg-accent" : "bg-[#E5E7EB]"
                 }`}
               />
             )}

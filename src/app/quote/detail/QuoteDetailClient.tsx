@@ -52,7 +52,7 @@ export default function QuoteDetailClient() {
             <p className="text-sm font-bold text-[#111827] mt-2">Quote received from sales team</p>
             <p className="text-[11px] text-[#F59E0B] mt-1">Valid until {q.validUntil}</p>
           </div>
-          <FileText className="w-8 h-8 text-[#1A4F9C] shrink-0" />
+          <FileText className="w-8 h-8 text-accent shrink-0" />
         </div>
 
         {/* Product */}
@@ -72,7 +72,7 @@ export default function QuoteDetailClient() {
         <div>
           <p className="text-[13px] font-bold text-[#111827] mb-2">Quoted Price</p>
           <div className="bg-white border border-[#E5E7EB] rounded-xl p-5 flex flex-col items-center">
-            <p className="text-4xl font-bold text-[#1A4F9C] tracking-tight">{q.quotedPriceLabel}</p>
+            <p className="text-4xl font-bold text-accent tracking-tight">{q.quotedPriceLabel}</p>
             <p className="text-[11px] text-[#6B7280] mt-1.5">per unit · + 18% GST</p>
             <div className="flex items-center gap-1.5 bg-[#DCFCE7] px-3 py-1.5 rounded-full mt-3">
               <Tag className="w-3 h-3 text-[#16A34A]" />
@@ -86,7 +86,7 @@ export default function QuoteDetailClient() {
           <p className="text-[13px] font-bold text-[#111827] mb-2">Admin&apos;s Response</p>
           <div className="bg-white border border-[#E5E7EB] rounded-xl p-3.5">
             <div className="flex items-center gap-2.5 mb-3">
-              <div className="w-9 h-9 rounded-full bg-[#1A4F9C] flex items-center justify-center shrink-0">
+              <div className="w-9 h-9 rounded-full bg-accent flex items-center justify-center shrink-0">
                 <span className="text-white font-bold text-sm">{salesRep.initials}</span>
               </div>
               <div>

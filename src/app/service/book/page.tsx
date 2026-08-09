@@ -63,7 +63,7 @@ export default function ServiceBookPage() {
         <Field label="Equipment">
           <div className="flex items-center gap-2.5 p-3 bg-[#F5F5F7] border border-[#E5E7EB] rounded-lg">
             <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center shrink-0">
-              <Building2 className="w-4 h-4 text-[#1A4F9C]" />
+              <Building2 className="w-4 h-4 text-accent" />
             </div>
             <div className="flex-1">
               <p className="text-[13px] font-bold text-[#111827]">Leica GS18 I</p>
@@ -80,14 +80,14 @@ export default function ServiceBookPage() {
             value={desc}
             onChange={(e) => setDesc(e.target.value)}
             placeholder="Describe the issue or service required..."
-            className="w-full bg-[#F5F5F7] border border-[#E5E7EB] rounded-lg px-3 py-3 text-sm text-[#111827] placeholder:text-[#9CA3AF] outline-none focus:border-[#1A4F9C] resize-none"
+            className="w-full bg-[#F5F5F7] border border-[#E5E7EB] rounded-lg px-3 py-3 text-sm text-[#111827] placeholder:text-[#9CA3AF] outline-none focus:border-accent resize-none"
           />
         </Field>
 
         {/* Upload */}
         <button
           onClick={() => show("Upload coming soon", "info")}
-          className="flex items-center justify-center gap-2 w-full h-12 border-2 border-dashed border-[#1A4F9C] rounded-lg mb-4 text-sm font-semibold text-[#1A4F9C]"
+          className="flex items-center justify-center gap-2 w-full h-12 border-2 border-dashed border-accent rounded-lg mb-4 text-sm font-semibold text-accent"
         >
           <CloudUpload className="w-4 h-4" />
           Upload Photos (Optional)
@@ -100,7 +100,7 @@ export default function ServiceBookPage() {
               <p className="text-sm font-bold text-[#111827]">{MONTH.name}</p>
               <div className="flex gap-2">
                 <button className="text-[#9CA3AF]"><ChevronLeft className="w-4 h-4" /></button>
-                <button className="text-[#1A4F9C]"><ChevronRight className="w-4 h-4" /></button>
+                <button className="text-accent"><ChevronRight className="w-4 h-4" /></button>
               </div>
             </div>
             <div className="grid grid-cols-7 mb-1">
@@ -119,17 +119,17 @@ export default function ServiceBookPage() {
                     onClick={() => setSelectedDate(day)}
                     className={`h-9 w-full flex flex-col items-center justify-center rounded-lg text-[13px] relative transition-colors ${
                       selectedDate === day
-                        ? "bg-[#1A4F9C] text-white font-bold"
+                        ? "bg-accent text-white font-bold"
                         : UNAVAILABLE.has(day)
                         ? "text-[#D1D5DB] cursor-not-allowed"
                         : day === 19
-                        ? "text-[#1A4F9C] font-bold"
+                        ? "text-accent font-bold"
                         : "text-[#111827] hover:bg-white"
                     }`}
                   >
                     {day}
                     {!UNAVAILABLE.has(day) && selectedDate !== day && (
-                      <div className="absolute bottom-1 w-1 h-1 rounded-full bg-[#1A4F9C]" />
+                      <div className="absolute bottom-1 w-1 h-1 rounded-full bg-accent" />
                     )}
                   </button>
                 )
@@ -147,7 +147,7 @@ export default function ServiceBookPage() {
                 onClick={() => setSlot(s.label)}
                 className={`flex-1 py-3 rounded-lg border text-center transition-colors ${
                   slot === s.label
-                    ? "bg-[#1A4F9C] border-[#1A4F9C] text-white"
+                    ? "bg-accent border-accent text-white"
                     : "bg-[#F5F5F7] border-[#E5E7EB] text-[#111827]"
                 }`}
               >
@@ -166,13 +166,13 @@ export default function ServiceBookPage() {
                 key={label}
                 onClick={() => setMode(label)}
                 className={`flex items-center gap-3 p-3 rounded-xl border text-left transition-colors ${
-                  mode === label ? "border-[#1A4F9C] bg-[#EFF6FF]" : "border-[#E5E7EB] bg-white"
+                  mode === label ? "border-accent bg-[#EFF6FF]" : "border-[#E5E7EB] bg-white"
                 }`}
               >
-                <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${mode === label ? "border-[#1A4F9C]" : "border-[#D1D5DB]"}`}>
-                  {mode === label && <div className="w-2.5 h-2.5 rounded-full bg-[#1A4F9C]" />}
+                <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${mode === label ? "border-accent" : "border-[#D1D5DB]"}`}>
+                  {mode === label && <div className="w-2.5 h-2.5 rounded-full bg-accent" />}
                 </div>
-                <Icon className="w-4.5 h-4.5 text-[#1A4F9C] shrink-0" />
+                <Icon className="w-4.5 h-4.5 text-accent shrink-0" />
                 <div>
                   <p className="text-[13px] font-semibold text-[#111827]">{label}</p>
                   <p className="text-[11px] text-[#6B7280] mt-0.5">{sub}</p>
@@ -206,7 +206,7 @@ function Chip({ label, active, onClick }: { label: string; active: boolean; onCl
     <button
       onClick={onClick}
       className={`px-3.5 py-2 rounded-full text-xs font-medium border transition-colors ${
-        active ? "bg-[#1A4F9C] text-white border-[#1A4F9C]" : "bg-[#F5F5F7] text-[#6B7280] border-[#E5E7EB]"
+        active ? "bg-accent text-white border-accent" : "bg-[#F5F5F7] text-[#6B7280] border-[#E5E7EB]"
       }`}
     >
       {label}

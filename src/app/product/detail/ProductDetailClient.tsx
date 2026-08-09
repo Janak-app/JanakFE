@@ -1,47 +1,46 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { useSearchParams, useRouter } from "next/navigation";
 import {
-  ChevronLeft, GitCompare, Heart, Share2, Phone, HelpCircle,
-  Star, Download, FileText, BarChart2, CheckCircle,
+  ChevronLeft, /*ChevronRight, GitCompare, Heart, Share2, Phone, HelpCircle,*/
+  Star, /* Download, FileText, BarChart2, */ CheckCircle, /* ShoppingCart, */ /*ClipboardList*/
 } from "lucide-react";
-import Header from "@/components/layout/Header";
 import StatusBadge from "@/components/ui/StatusBadge";
 import Button from "@/components/ui/Button";
 import ProductCard from "@/components/products/ProductCard";
 import useProductDetail from "@/hooks/useProductDetail";
-import { useCart } from "@/context/CartContext";
+// import { useCart } from "@/context/CartContext";
 import { useToast } from "@/context/ToastContext";
 
-const TABS = ["Overview", "Specifications", "Downloads", "Reviews"] as const;
+const TABS = ["Overview", "Specifications", "Reviews"] as const;
 type TabKey = typeof TABS[number];
 
 export default function ProductDetailClient() {
   const searchParams = useSearchParams();
   const id = searchParams.get("id") ?? "";
   const router = useRouter();
-  const { addItem } = useCart();
+  // const { addItem, items, updateQty, cartCount } = useCart();
   const { show } = useToast();
 
   const { data, loading, isError } = useProductDetail(id);
   const product = data?.product ?? null;
-  const salesRepName = data?.salesRepName ?? "Sales Team";
-  const salesRepPhone = data?.salesRepPhone ?? "";
-  const salesRepInitials = salesRepName.slice(0, 2).toUpperCase();
+  // const salesRepName = data?.salesRepName ?? "Sales Team";
+  // const salesRepPhone = data?.salesRepPhone ?? "";
+  // const salesRepInitials = salesRepName.slice(0, 2).toUpperCase();
 
   const [tab, setTab] = useState<TabKey>("Overview");
   const [imgIdx, setImgIdx] = useState(0);
-  const [wishlisted, setWishlisted] = useState(false);
+  // const [wishlisted, setWishlisted] = useState(false);
   const [askVisible, setAskVisible] = useState(false);
   const [askText, setAskText] = useState("");
 
   if (loading) {
     return (
       <div className="min-h-screen bg-white flex flex-col">
-        <Header />
         <div className="flex-1 flex items-center justify-center">
-          <div className="w-8 h-8 border-2 border-[#1A4F9C] border-t-transparent rounded-full animate-spin" />
+          <div className="w-8 h-8 border-2 border-accent border-t-transparent rounded-full animate-spin" />
         </div>
       </div>
     );
@@ -50,7 +49,6 @@ export default function ProductDetailClient() {
   if (isError || !product) {
     return (
       <div className="min-h-screen bg-white flex flex-col">
-        <Header />
         <div className="flex-1 flex items-center justify-center">
           <p className="text-sm text-[#6B7280]">Product not found.</p>
         </div>
@@ -60,15 +58,15 @@ export default function ProductDetailClient() {
 
   const related: typeof product[] = [];
 
-  const handleAddToCart = () => {
-    addItem(product.id, 1);
-    show("Added to cart", "success");
-  };
+  // const cartItem = items.find((i) => i.productId === product.id);
+  // const cartQty = cartItem?.quantity ?? 0;
+
+  // const handleAddToCart = () => {
+  //   addItem(product.id, 1);
+  // };
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
-      <Header />
-
       {/* Top bar */}
       <div className="sticky top-0 z-20 bg-white border-b border-[#E5E7EB] flex items-center px-2 py-2 gap-1">
         <button
@@ -78,13 +76,13 @@ export default function ProductDetailClient() {
           <ChevronLeft className="w-5 h-5 text-[#111827]" />
         </button>
         <div className="flex-1" />
-        <button
+        {/* <button
           onClick={() => show("Compare feature coming soon", "info")}
           className="w-9 h-9 rounded-full bg-[#F5F5F7] flex items-center justify-center"
         >
           <GitCompare className="w-4.5 h-4.5 text-[#111827]" />
-        </button>
-        <button
+        </button> */}
+        {/* <button
           onClick={() => { setWishlisted(!wishlisted); show(wishlisted ? "Removed from wishlist" : "Added to wishlist"); }}
           className="w-9 h-9 rounded-full bg-[#F5F5F7] flex items-center justify-center"
         >
@@ -95,17 +93,18 @@ export default function ProductDetailClient() {
           className="w-9 h-9 rounded-full bg-[#F5F5F7] flex items-center justify-center"
         >
           <Share2 className="w-4 h-4 text-[#111827]" />
-        </button>
+        </button> */}
       </div>
 
-      <div className="flex-1 pb-28 max-w-3xl mx-auto w-full">
+      <div className="flex-1 pb-6 max-w-3xl mx-auto w-full">
         {/* Image gallery */}
         <div className="bg-[#F5F5F7] relative overflow-hidden">
           <div className="relative h-72 md:h-96">
-            <img
-              src={product.images[imgIdx]}
+            <Image
+              src={`/api/img?url=${encodeURIComponent(product.images[imgIdx])}`}
               alt={product.name}
-              className="w-full h-full object-contain"
+              fill
+              className="object-contain"
             />
           </div>
           <div className="flex justify-center gap-1.5 pb-3">
@@ -113,7 +112,7 @@ export default function ProductDetailClient() {
               <button
                 key={i}
                 onClick={() => setImgIdx(i)}
-                className={`h-1.5 rounded-full transition-all ${i === imgIdx ? "w-5 bg-[#1A4F9C]" : "w-1.5 bg-[#CBD5E1]"}`}
+                className={`h-1.5 rounded-full transition-all ${i === imgIdx ? "w-5 bg-accent" : "w-1.5 bg-[#CBD5E1]"}`}
               />
             ))}
           </div>
@@ -123,9 +122,9 @@ export default function ProductDetailClient() {
                 <button
                   key={i}
                   onClick={() => setImgIdx(i)}
-                  className={`shrink-0 w-14 h-14 rounded-lg overflow-hidden border-2 transition-colors ${i === imgIdx ? "border-[#1A4F9C]" : "border-transparent"}`}
+                  className={`relative shrink-0 w-14 h-14 rounded-lg overflow-hidden border-2 transition-colors ${i === imgIdx ? "border-accent" : "border-transparent"}`}
                 >
-                  <img src={img} alt="" className="w-full h-full object-cover" />
+                  <Image src={`/api/img?url=${encodeURIComponent(img)}`} alt="" fill className="object-cover" />
                 </button>
               ))}
             </div>
@@ -146,23 +145,23 @@ export default function ProductDetailClient() {
           <div className="mt-3 mb-4">
             {product.price ? (
               <>
-                <p className="text-2xl font-bold text-[#1A4F9C] tracking-tight">{product.priceLabel}</p>
+                <p className="text-2xl font-bold text-accent tracking-tight">{product.priceLabel}</p>
                 <p className="text-[11px] text-[#6B7280] mt-1">+ 18% GST · Inclusive of warranty</p>
               </>
             ) : (
               <>
-                <p className="text-2xl font-bold text-[#1A4F9C] tracking-tight">Price on Request</p>
+                <p className="text-2xl font-bold text-accent tracking-tight">Price on Request</p>
                 <p className="text-[11px] text-[#6B7280] mt-1">Tailored pricing for your project</p>
               </>
             )}
           </div>
 
           {/* Sales rep card */}
-          <button
+          {/* <button
             onClick={() => window.open(`tel:${salesRepPhone.replace(/\s/g, "")}`, "_self")}
             className="w-full flex items-center gap-3 bg-[#F5F5F7] border border-[#E5E7EB] rounded-xl p-3 mb-5 text-left"
           >
-            <div className="w-10 h-10 rounded-full bg-[#1A4F9C] flex items-center justify-center shrink-0">
+            <div className="w-10 h-10 rounded-full bg-accent flex items-center justify-center shrink-0">
               <span className="text-white font-bold text-sm">{salesRepInitials}</span>
             </div>
             <div className="flex-1 min-w-0">
@@ -173,7 +172,7 @@ export default function ProductDetailClient() {
             <div className="w-9 h-9 rounded-full bg-[#16A34A] flex items-center justify-center shrink-0">
               <Phone className="w-4 h-4 text-white" />
             </div>
-          </button>
+          </button> */}
 
           {/* Tabs */}
           <div className="flex border-b border-[#E5E7EB] mb-4">
@@ -183,7 +182,7 @@ export default function ProductDetailClient() {
                 onClick={() => setTab(t)}
                 className={`flex-1 py-3 text-xs font-medium border-b-2 transition-colors ${
                   tab === t
-                    ? "border-[#1A4F9C] text-[#1A4F9C] font-semibold"
+                    ? "border-accent text-accent font-semibold"
                     : "border-transparent text-[#6B7280]"
                 }`}
               >
@@ -206,13 +205,21 @@ export default function ProductDetailClient() {
                   </div>
                 ))}
               </div>
-              <button
-                onClick={() => setAskVisible(true)}
-                className="flex items-center gap-1.5 mt-4 pt-3.5 border-t border-[#E5E7EB] w-full text-left"
+
+              {/* Request Quote card */}
+              {/* <button
+                onClick={() => router.push(`/quote/request?productId=${product.id}`)}
+                className="w-full flex items-center gap-3 border border-[#E5E7EB] rounded-xl p-4 mt-5 text-left"
               >
-                <HelpCircle className="w-4 h-4 text-[#1A4F9C]" />
-                <span className="text-[13px] font-semibold text-[#1A4F9C]">Ask a Question</span>
-              </button>
+                <div className="w-10 h-10 rounded-xl bg-[#EFF6FF] flex items-center justify-center shrink-0">
+                  <ClipboardList className="w-5 h-5 text-[#1A4F9C]" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[14px] font-bold text-[#111827]">Need a different price?</p>
+                  <p className="text-[12px] text-[#6B7280] mt-0.5">Request Quote Adjustment</p>
+                </div>
+                <ChevronRight className="w-5 h-5 text-[#9CA3AF] shrink-0" />
+              </button> */}
             </div>
           )}
 
@@ -230,6 +237,7 @@ export default function ProductDetailClient() {
             </div>
           )}
 
+          {/* Downloads tab — hidden for now
           {tab === "Downloads" && (
             <div className="flex flex-col gap-3">
               {[
@@ -248,11 +256,12 @@ export default function ProductDetailClient() {
                     <p className="text-[13px] font-semibold text-[#111827]">{name}</p>
                     <p className="text-[11px] text-[#6B7280] mt-0.5">PDF · {size}</p>
                   </div>
-                  <Download className="w-5 h-5 text-[#1A4F9C]" />
+                  <Download className="w-5 h-5 text-accent" />
                 </button>
               ))}
             </div>
           )}
+          */}
 
           {tab === "Reviews" && (
             <div className="flex flex-col gap-3">
@@ -300,22 +309,51 @@ export default function ProductDetailClient() {
       </div>
 
       {/* Sticky bottom action bar */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-[#E5E7EB] px-4 py-3 pb-5 z-20">
+      {/* <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-[#E5E7EB] px-4 py-3 pb-5 z-20">
         <div className="max-w-3xl mx-auto flex gap-3">
-          <div className="flex-1">
-            <Button
-              label="Request Quote"
-              variant="outlined"
-              onClick={() => router.push(`/quote/request?productId=${product.id}`)}
-            />
-          </div>
-          {product.price && (
-            <div className="flex-1">
-              <Button label="Add to Cart" onClick={handleAddToCart} />
+
+          {/* View Cart button */}
+          {/* <button
+            onClick={() => router.push("/cart")}
+            className="flex-1 h-[52px] flex items-center justify-center gap-2.5 border border-accent rounded-xl"
+          >
+            <div className="relative">
+              <ShoppingCart className="w-6 h-6 text-[#111827]" />
+              {cartCount > 0 && (
+                <span className="absolute -top-2 -right-2 w-5 h-5 bg-accent text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+                  {cartCount}
+                </span>
+              )}
             </div>
-          )}
-        </div>
-      </div>
+            <span className="text-[15px] font-semibold text-[#111827]">View Cart</span>
+          </button> */}
+
+          {/* Add to Cart / Stepper */}
+          {/* {product.price && (
+            <div className="flex-1">
+              {cartQty > 0 ? (
+                <div className="flex items-center justify-between h-[52px] rounded-xl overflow-hidden bg-accent">
+                  <button
+                    onClick={() => updateQty(product.id, cartQty - 1)}
+                    className="w-12 h-full flex items-center justify-center text-white text-2xl font-bold"
+                  >
+                    −
+                  </button>
+                  <span className="text-white font-bold text-lg">{cartQty}</span>
+                  <button
+                    onClick={() => updateQty(product.id, cartQty + 1)}
+                    className="w-12 h-full flex items-center justify-center text-white text-2xl font-bold"
+                  >
+                    +
+                  </button>
+                </div>
+              ) : (
+                <Button label="Add to Cart" onClick={handleAddToCart} />
+              )}
+            </div>
+          )} */}
+        {/* </div>
+      </div> */}
 
       {askVisible && (
         <div className="fixed inset-0 z-50 flex items-end justify-center">

@@ -10,12 +10,22 @@ import BottomTabBar from "@/components/layout/BottomTabBar";
 
 const queryClient = new QueryClient();
 
+const SHOW_TAB_ROUTES = ["/", "/explore"];
+
+function useShowBottomTab() {
+  const pathname = usePathname();
+  return SHOW_TAB_ROUTES.includes(pathname);
+}
+
 function AuthGuard({ children }: { children: ReactNode }) {
   const { user, loading } = useAuth();
   const pathname = usePathname();
   const router = useRouter();
 
-  const isPublic = pathname.startsWith("/auth");
+  const isPublic =
+    pathname.startsWith("/auth") ||
+    pathname === "/privacy-policy" ||
+    pathname === "/terms";
 
   useEffect(() => {
     if (!loading && !user && !isPublic) {
@@ -29,15 +39,20 @@ function AuthGuard({ children }: { children: ReactNode }) {
   return <>{children}</>;
 }
 
+function PageWrapper({ children }: { children: ReactNode }) {
+  const showTab = useShowBottomTab();
+  return <div className={showTab ? "pb-14 md:pb-0" : ""}>{children}</div>;
+}
+
 export default function Providers({ children }: { children: ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <CartProvider>
           <ToastProvider>
-            <div className="pb-14 md:pb-0">
+            <PageWrapper>
               <AuthGuard>{children}</AuthGuard>
-            </div>
+            </PageWrapper>
             <BottomTabBar />
           </ToastProvider>
         </CartProvider>

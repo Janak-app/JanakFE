@@ -2,149 +2,267 @@
 
 import { useState, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { Clock, Package } from "lucide-react";
-import Header from "@/components/layout/Header";
-import Button from "@/components/ui/Button";
-import { getProductById } from "@/data/products";
+import { ChevronLeft } from "lucide-react";
 import { useToast } from "@/context/ToastContext";
+import { useAuth } from "@/context/AuthContext";
+import { formatINR } from "@/data/products";
+import useProductDetail from "@/hooks/useProductDetail";
 
-const USE_OPTIONS = ["Construction", "Cadastral Survey", "Infrastructure", "Mining", "Research", "Other"];
-const BUDGET_OPTIONS = ["< ₹5 Lakh", "₹5–10 Lakh", "₹10–25 Lakh", "₹25 Lakh+"];
+interface QuoteItem {
+  productId: string;
+  name: string;
+  category: string;
+  image: string;
+  price: number;
+  qty: number;
+}
 
 function QuoteRequestForm() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { show } = useToast();
+  const { user } = useAuth();
 
-  const productId = searchParams.get("productId") || "";
-  const product = productId ? getProductById(productId) : null;
+  const productId = searchParams.get("productId") ?? "";
+  const { data } = useProductDetail(productId);
+  const product = data?.product ?? null;
 
-  const [qty, setQty] = useState("1");
-  const [use, setUse] = useState(USE_OPTIONS[0]);
-  const [budget, setBudget] = useState(BUDGET_OPTIONS[1]);
-  const [required, setRequired] = useState("Within 30 days");
-  const [notes, setNotes] = useState("");
+  const [editingCustomer, setEditingCustomer] = useState(false);
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState(user?.email ?? "");
+  const [quotationValue, setQuotationValue] = useState("");
+  const [note, setNote] = useState("");
+
+  const [items, setItems] = useState<QuoteItem[]>(() => {
+    if (!product) return [];
+    return [{
+      productId: product.id,
+      name: product.name,
+      category: product.category,
+      image: product.images[0] ?? "",
+      price: product.price ?? 0,
+      qty: 1,
+    }];
+  });
+
+  // Sync first item when product loads
+  if (product && items.length === 0) {
+    setItems([{
+      productId: product.id,
+      name: product.name,
+      category: product.category,
+      image: product.images[0] ?? "",
+      price: product.price ?? 0,
+      qty: 1,
+    }]);
+  }
+
+  const totalMRP = items.reduce((sum, it) => sum + it.price * it.qty, 0);
+
+  const updateQty = (productId: string, qty: number) => {
+    if (qty < 1) return;
+    setItems((prev) => prev.map((it) => it.productId === productId ? { ...it, qty } : it));
+  };
 
   const handleSubmit = () => {
-    show("Quote request submitted!", "success");
+    show("Quotation request submitted!", "success");
     setTimeout(() => router.replace("/quote/list"), 600);
   };
 
   return (
-    <div className="flex-1 max-w-3xl mx-auto w-full px-4 py-5 pb-32">
-      {product && (
-        <div className="flex items-center gap-3 p-3.5 bg-[#EFF6FF] border border-[#DBEAFE] rounded-xl mb-5">
-          <div className="w-10 h-10 rounded-lg bg-white flex items-center justify-center shrink-0">
-            <Package className="w-5 h-5 text-[#1A4F9C]" />
-          </div>
-          <div>
-            <p className="text-[9px] font-bold text-[#1A4F9C] tracking-[1.5px]">PRODUCT</p>
-            <p className="text-[13px] font-bold text-[#111827] mt-0.5 leading-snug">{product.name}</p>
-          </div>
+    <div className="flex-1 overflow-y-auto pb-28">
+
+      {/* Customer Detail */}
+      <div className="px-4 py-4">
+        <div className="flex items-center justify-between mb-3">
+          <p className="text-[15px] font-bold text-[#111827]">Customer Detail</p>
+          <button
+            onClick={() => setEditingCustomer(!editingCustomer)}
+            className="text-[13px] font-semibold text-accent"
+          >
+            {editingCustomer ? "Done" : "Change"}
+          </button>
         </div>
-      )}
+        <div className="flex flex-col">
+          <CustomerRow
+            label="Customer Name"
+            value={name}
+            placeholder="Enter your name"
+            editing={editingCustomer}
+            onChange={setName}
+          />
+          <CustomerRow
+            label="Contact"
+            value={phone}
+            placeholder="+91 XXXXXXXXXX"
+            editing={editingCustomer}
+            inputMode="tel"
+            onChange={setPhone}
+          />
+          <CustomerRow
+            label="Email Address"
+            value={email}
+            placeholder="email@example.com"
+            editing={editingCustomer}
+            inputMode="email"
+            onChange={setEmail}
+          />
+        </div>
+      </div>
+      <div className="h-2 bg-[#F5F5F7]" />
 
-      <Field label="Quantity">
-        <input
-          type="number"
-          min={1}
-          value={qty}
-          onChange={(e) => setQty(e.target.value)}
-          className="h-12 w-full bg-[#F5F5F7] border border-[#E5E7EB] rounded-lg px-3 text-sm text-[#111827] outline-none focus:border-[#1A4F9C]"
-        />
-      </Field>
-
-      <Field label="Intended Use">
-        <div className="flex gap-2 flex-wrap">
-          {USE_OPTIONS.map((u) => (
-            <Chip key={u} label={u} active={use === u} onClick={() => setUse(u)} />
+      {/* Items for Quotation */}
+      <div className="px-4 py-4">
+        <div className="flex items-center justify-between mb-3">
+          <p className="text-[15px] font-bold text-[#111827]">Item for Quotation</p>
+          <button
+            onClick={() => router.push("/explore")}
+            className="text-[13px] font-semibold text-accent"
+          >
+            Add More Products
+          </button>
+        </div>
+        <div className="flex flex-col gap-3">
+          {items.map((it) => (
+            <div key={it.productId} className="flex items-center gap-3">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={it.image}
+                alt={it.name}
+                className="w-16 h-16 rounded-xl bg-[#F3F4F6] object-contain p-1.5 shrink-0"
+              />
+              <div className="flex-1 min-w-0">
+                <span className="text-[11px] font-semibold text-[#0EA5E9]">{it.category}</span>
+                <p className="text-[13px] font-bold text-[#111827] leading-snug line-clamp-2">{it.name}</p>
+              </div>
+              <div className="flex flex-col items-end gap-1.5 shrink-0">
+                {/* Outlined stepper */}
+                <div className="flex items-center border border-accent rounded-xl overflow-hidden">
+                  <button
+                    onClick={() => updateQty(it.productId, it.qty - 1)}
+                    className="w-8 h-8 flex items-center justify-center text-accent text-lg font-bold"
+                  >
+                    −
+                  </button>
+                  <span className="w-7 text-center text-[13px] font-bold text-[#111827]">
+                    {String(it.qty).padStart(2, "0")}
+                  </span>
+                  <button
+                    onClick={() => updateQty(it.productId, it.qty + 1)}
+                    className="w-8 h-8 flex items-center justify-center text-accent text-lg font-bold"
+                  >
+                    +
+                  </button>
+                </div>
+                {it.price > 0 && (
+                  <span className="text-[13px] font-bold text-[#111827]">
+                    {formatINR(it.price * it.qty)}
+                  </span>
+                )}
+              </div>
+            </div>
           ))}
         </div>
-      </Field>
+      </div>
+      <div className="h-2 bg-[#F5F5F7]" />
 
-      <Field label="Required By">
+      {/* Price Negotiation */}
+      <div className="px-4 pt-4">
+        <p className="text-[15px] font-bold text-[#111827] mb-4">Price Negotiation</p>
+      </div>
+      <div className="bg-white px-4 pb-4">
+        <p className="text-[13px] text-[#6B7280] mb-1">Total MRP</p>
+        <p className="text-[22px] font-bold text-[#111827] mb-5">
+          {totalMRP > 0 ? formatINR(totalMRP) : "—"}
+        </p>
+
+        <p className="text-[13px] text-[#6B7280] mb-1.5">Quotation Value</p>
         <input
-          type="text"
-          value={required}
-          onChange={(e) => setRequired(e.target.value)}
-          className="h-12 w-full bg-[#F5F5F7] border border-[#E5E7EB] rounded-lg px-3 text-sm text-[#111827] outline-none focus:border-[#1A4F9C]"
+          value={quotationValue}
+          onChange={(e) => setQuotationValue(e.target.value.replace(/[^0-9]/g, ""))}
+          inputMode="numeric"
+          placeholder="Add Quotation value here"
+          className="w-full h-12 bg-white border border-[#E5E7EB] rounded-xl px-4 text-[14px] text-[#111827] placeholder:text-[#9CA3AF] outline-none focus:border-accent mb-4"
         />
-      </Field>
 
-      <Field label="Budget Range">
-        <div className="flex gap-2 flex-wrap">
-          {BUDGET_OPTIONS.map((b) => (
-            <Chip key={b} label={b} active={budget === b} onClick={() => setBudget(b)} />
-          ))}
-        </div>
-      </Field>
-
-      <Field label="Additional Notes">
+        <p className="text-[13px] text-[#6B7280] mb-1.5">Additional Note</p>
         <textarea
+          value={note}
+          onChange={(e) => setNote(e.target.value)}
+          placeholder="Tell us more about your requirement"
           rows={4}
-          value={notes}
-          onChange={(e) => setNotes(e.target.value)}
-          placeholder="Tell us more about your project requirements..."
-          className="w-full bg-[#F5F5F7] border border-[#E5E7EB] rounded-lg px-3 py-3 text-sm text-[#111827] placeholder:text-[#9CA3AF] outline-none focus:border-[#1A4F9C] resize-none"
+          className="w-full bg-white border border-[#E5E7EB] rounded-xl px-4 py-3 text-[14px] text-[#111827] placeholder:text-[#9CA3AF] outline-none focus:border-accent resize-none"
         />
-      </Field>
+      </div>
 
-      <div className="flex items-center gap-2 p-3 bg-[#E0F2FE] rounded-lg">
-        <Clock className="w-4 h-4 text-[#1A4F9C] shrink-0" />
-        <p className="text-[11px] text-[#111827]">Our sales team will respond within 24 working hours.</p>
+      {/* Submit */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-[#E5E7EB] px-4 py-3 pb-6 z-20">
+        <button
+          onClick={handleSubmit}
+          className="w-full h-13 bg-accent text-white text-[15px] font-bold rounded-xl py-3.5"
+        >
+          Raise Quotation Request
+        </button>
       </div>
     </div>
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function CustomerRow({
+  label,
+  value,
+  placeholder,
+  editing,
+  inputMode,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  placeholder: string;
+  editing: boolean;
+  inputMode?: React.HTMLAttributes<HTMLInputElement>["inputMode"];
+  onChange: (v: string) => void;
+}) {
   return (
-    <div className="mb-4">
-      <p className="text-xs font-semibold text-[#111827] mb-2">{label}</p>
-      {children}
+    <div className="flex items-center justify-between py-3 border-b border-dashed border-[#E5E7EB] last:border-0">
+      <span className="text-[13px] text-[#6B7280] w-32 shrink-0">{label}</span>
+      {editing ? (
+        <input
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder={placeholder}
+          inputMode={inputMode}
+          className="flex-1 text-right text-[13px] font-semibold text-[#111827] outline-none bg-transparent placeholder:text-[#9CA3AF]"
+        />
+      ) : (
+        <span className="flex-1 text-right text-[13px] font-semibold text-[#111827]">
+          {value || <span className="text-[#9CA3AF] font-normal">{placeholder}</span>}
+        </span>
+      )}
     </div>
-  );
-}
-
-function Chip({ label, active, onClick }: { label: string; active: boolean; onClick: () => void }) {
-  return (
-    <button
-      onClick={onClick}
-      className={`px-3.5 py-2 rounded-full text-xs font-medium border transition-colors ${
-        active ? "bg-[#1A4F9C] text-white border-[#1A4F9C]" : "bg-[#F5F5F7] text-[#6B7280] border-[#E5E7EB]"
-      }`}
-    >
-      {label}
-    </button>
   );
 }
 
 export default function QuoteRequestPage() {
   const router = useRouter();
-  const { show } = useToast();
-
-  const handleSubmit = () => {
-    show("Quote request submitted!", "success");
-    setTimeout(() => router.replace("/quote/list"), 600);
-  };
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
-      <Header />
-
-      <div className="bg-white px-4 pt-5 pb-3 border-b border-[#E5E7EB] max-w-3xl mx-auto w-full">
-        <h1 className="text-2xl font-bold text-[#111827] tracking-tight">Request a Quote</h1>
+      {/* Top bar */}
+      <div className="flex items-center gap-3 px-4 pt-5 pb-3 border-b border-[#E5E7EB]">
+        <button
+          onClick={() => router.back()}
+          className="w-9 h-9 flex items-center justify-center"
+        >
+          <ChevronLeft className="w-5 h-5 text-[#111827]" />
+        </button>
+        <h1 className="text-[18px] font-bold text-[#111827]">Request a Quotation</h1>
       </div>
 
       <Suspense fallback={<div className="flex-1" />}>
         <QuoteRequestForm />
       </Suspense>
-
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-[#E5E7EB] px-4 py-3 pb-6 z-20">
-        <div className="max-w-3xl mx-auto">
-          <Button label="Submit Request" onClick={handleSubmit} />
-        </div>
-      </div>
     </div>
   );
 }

@@ -56,7 +56,7 @@ export default function Testimonials() {
               </div>
 
               <div className="flex items-center gap-3 mt-auto">
-                <div className="w-10 h-10 rounded-full bg-[#1A4F9C] flex items-center justify-center shrink-0">
+                <div className="w-10 h-10 rounded-full bg-accent flex items-center justify-center shrink-0">
                   <span className="text-white text-xs font-bold">{t.initials}</span>
                 </div>
                 <div>

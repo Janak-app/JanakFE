@@ -35,7 +35,7 @@ export default function AboutSection() {
             calibration, training, AMC, software support, trade-ins &amp; buy-backs.
           </p>
 
-          <button className="inline-flex items-center gap-2 bg-[#F5F5F7] border border-[#E5E7EB] rounded-lg px-4 py-2.5 text-sm font-semibold text-[#1A4F9C] hover:bg-[#E9E9EC] transition-colors">
+          <button className="inline-flex items-center gap-2 bg-[#F5F5F7] border border-[#E5E7EB] rounded-lg px-4 py-2.5 text-sm font-semibold text-accent hover:bg-[#E9E9EC] transition-colors">
             <Download className="w-4 h-4" />
             Download Company Brochure
           </button>
@@ -45,7 +45,7 @@ export default function AboutSection() {
         <div className="lg:w-[460px] grid grid-cols-2 gap-3 content-start">
           {STATS.map((s) => (
             <div key={s.label} className="bg-[#F5F5F7] border border-[#E5E7EB] rounded-2xl px-5 py-4">
-              <p className="text-2xl font-extrabold text-[#1A4F9C] mb-0.5">{s.value}</p>
+              <p className="text-2xl font-extrabold text-accent mb-0.5">{s.value}</p>
               <p className="text-sm text-[#6B7280]">{s.label}</p>
             </div>
           ))}

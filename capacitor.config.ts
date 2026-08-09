@@ -3,7 +3,7 @@ import * as dotenv from "dotenv";
 dotenv.config();
 
 const config: CapacitorConfig = {
-  appId: "com.janakpositioning.app",
+  appId: "com.janakpositioning.janakglobal",
   appName: "Janak",
   webDir: "out",                     // Next.js static export output directory
   server: {

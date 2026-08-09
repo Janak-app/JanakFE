@@ -1,4 +1,4 @@
-package com.janakpositioning.app;
+package com.janakpositioning.janakglobal;
 
 import com.getcapacitor.BridgeActivity;
 

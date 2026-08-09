@@ -31,6 +31,7 @@ export default function ProfileDrawer({ open, onClose }: ProfileDrawerProps) {
   const handleLogout = () => {
     onClose();
     if (window.confirm("Are you sure you want to logout?")) {
+      localStorage.removeItem("accessToken");
       router.replace("/auth");
     }
   };
@@ -97,7 +98,7 @@ export default function ProfileDrawer({ open, onClose }: ProfileDrawerProps) {
                     }`}
                   >
                     <Icon
-                      className={`w-4 h-4 ${isDanger ? "text-[#DC2626]" : "text-[#1A4F9C]"}`}
+                      className={`w-4 h-4 ${isDanger ? "text-[#DC2626]" : "text-accent"}`}
                     />
                   </div>
                   <div className="flex-1">

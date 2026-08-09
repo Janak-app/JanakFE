@@ -44,7 +44,7 @@ interface AddressFormProps {
 }
 
 const inputCls =
-  "w-full h-11 bg-[#F5F5F7] border border-[#E5E7EB] rounded-lg px-3 text-sm text-[#111827] placeholder:text-[#9CA3AF] outline-none focus:border-[#1A4F9C] transition-colors";
+  "w-full h-11 bg-[#F5F5F7] border border-[#E5E7EB] rounded-lg px-3 text-sm text-[#111827] placeholder:text-[#9CA3AF] outline-none focus:border-accent transition-colors";
 
 function Field({
   label,
@@ -118,7 +118,7 @@ export default function AddressForm({ onSave, onClose }: AddressFormProps) {
                       onClick={() => field.onChange(l)}
                       className={`flex-1 h-10 rounded-lg border text-xs font-bold tracking-wide transition-colors ${
                         field.value === l
-                          ? "border-[#1A4F9C] bg-[#EFF6FF] text-[#1A4F9C]"
+                          ? "border-accent bg-[#EFF6FF] text-accent"
                           : "border-[#E5E7EB] bg-white text-[#6B7280]"
                       }`}
                     >
@@ -209,7 +209,7 @@ export default function AddressForm({ onSave, onClose }: AddressFormProps) {
                 <div
                   className={`w-5 h-5 rounded border-2 flex items-center justify-center shrink-0 transition-colors ${
                     field.value
-                      ? "bg-[#1A4F9C] border-[#1A4F9C]"
+                      ? "bg-accent border-accent"
                       : "border-[#D1D5DB]"
                   }`}
                 >

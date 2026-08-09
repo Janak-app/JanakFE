@@ -4,17 +4,19 @@ import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
-import { ShoppingCart, User, Search, Menu, X, LogOut, ChevronDown, Navigation } from "lucide-react";
-import { useCart } from "@/context/CartContext";
+import { /* ShoppingCart, */ User, Search, LogOut, ChevronDown, Navigation } from "lucide-react";
+// import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
 import useMutationApi from "@/hooks/useMutationApi";
 
 const NAV = [
   { label: "Home", href: "/" },
-  { label: "Catalog", href: "/explore" },
-  { label: "Service", href: "/service/book" },
-  { label: "Quotes", href: "/quote/list" },
-  { label: "Contact", href: "/chat" },
+  { label: "Privacy Policy", href: "/privacy-policy" },
+  { label: "Terms & Conditions", href: "/terms" },
+  // { label: "Catalog", href: "/explore" },
+  // { label: "Service", href: "/service/book" },
+  // { label: "Quotes", href: "/quote/list" },
+  // { label: "Contact", href: "/chat" },
 ];
 
 function getInitials(email: string) {
@@ -24,9 +26,8 @@ function getInitials(email: string) {
 export default function Header() {
   const pathname = usePathname();
   const router = useRouter();
-  const { cartCount } = useCart();
+  // const { cartCount } = useCart();
   const { user, loading } = useAuth();
-  const [mobileOpen, setMobileOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -61,14 +62,8 @@ export default function Header() {
       {/* ── Mobile header (3-row layout) ── */}
       <div className="md:hidden px-4 pt-3 pb-3 flex flex-col gap-2">
 
-        {/* Row 1: Menu + Logo */}
-        <div className="flex items-center justify-between">
-          <button
-            className="w-8 h-8 flex items-center justify-center"
-            onClick={() => setMobileOpen(!mobileOpen)}
-          >
-            {mobileOpen ? <X className="w-5 h-5 text-[#111827]" /> : <Menu className="w-5 h-5 text-[#111827]" />}
-          </button>
+        {/* Row 1: Logo */}
+        <div className="flex items-center justify-center">
           <Link href="/">
             <Image
               src="/logo/janak-logo.svg"
@@ -78,13 +73,11 @@ export default function Header() {
               priority
             />
           </Link>
-          {/* Spacer to keep logo centered */}
-          <div className="w-8" />
         </div>
 
         {/* Row 2: Delivery location */}
         <div className="flex items-center justify-center gap-1.5">
-          <Navigation className="w-3.5 h-3.5 text-[#1A4F9C] fill-[#1A4F9C]" />
+          <Navigation className="w-3.5 h-3.5 text-accent fill-[#1A4F9C]" />
           <span className="text-[13px] font-semibold text-[#111827]">
             Deliver to : Sector 62, Noida, UP
           </span>
@@ -93,14 +86,14 @@ export default function Header() {
 
         {/* Row 3: Search + Cart */}
         <div className="flex items-center gap-2">
-          <div className="flex-1 flex items-center gap-2 h-10 bg-white border border-[#E5E7EB] rounded-full px-4">
+          {/* <div className="flex-1 flex items-center gap-2 h-10 bg-white border border-[#E5E7EB] rounded-full px-4">
             <Search className="w-4 h-4 text-[#9CA3AF] shrink-0" />
             <input
               placeholder="Search Product"
               className="flex-1 text-sm bg-transparent outline-none text-[#111827] placeholder:text-[#9CA3AF]"
             />
-          </div>
-          <Link
+          </div> */}
+          {/* <Link
             href="/cart"
             className={`relative w-10 h-10 flex items-center justify-center rounded-xl shrink-0 transition-colors ${
               cartCount > 0 ? "bg-accent" : "border border-[#E5E7EB]"
@@ -112,7 +105,7 @@ export default function Header() {
                 {cartCount}
               </span>
             )}
-          </Link>
+          </Link> */}
         </div>
       </div>
 
@@ -137,12 +130,12 @@ export default function Header() {
                 key={item.label}
                 href={item.href}
                 className={`px-3.5 py-2 text-[13px] font-medium rounded transition-colors relative ${
-                  active ? "text-[#1A4F9C] font-semibold" : "text-[#111827] hover:text-[#1A4F9C]"
+                  active ? "text-accent font-semibold" : "text-[#111827] hover:text-accent"
                 }`}
               >
                 {item.label}
                 {active && (
-                  <span className="absolute bottom-0 left-3.5 right-3.5 h-0.5 bg-[#1A4F9C] rounded" />
+                  <span className="absolute bottom-0 left-3.5 right-3.5 h-0.5 bg-accent rounded" />
                 )}
               </Link>
             );
@@ -160,7 +153,7 @@ export default function Header() {
         </div>
 
         <div className="flex items-center gap-2">
-          <Link
+          {/* <Link
             href="/cart"
             className={`relative w-10 h-10 flex items-center justify-center rounded-xl transition-colors ${
               cartCount > 0 ? "bg-accent" : "hover:bg-[#F5F5F7]"
@@ -172,7 +165,7 @@ export default function Header() {
                 {cartCount}
               </span>
             )}
-          </Link>
+          </Link> */}
 
           {!loading && (
             <div ref={menuRef}>
@@ -182,7 +175,7 @@ export default function Header() {
                     onClick={() => setUserMenuOpen((v) => !v)}
                     className="flex items-center gap-2 h-10 px-3 rounded-lg hover:bg-[#F5F5F7] transition-colors"
                   >
-                    <div className="w-7 h-7 rounded-full bg-[#1A4F9C] flex items-center justify-center text-white text-[11px] font-bold">
+                    <div className="w-7 h-7 rounded-full bg-accent flex items-center justify-center text-white text-[11px] font-bold">
                       {getInitials(user.email)}
                     </div>
                     <span className="text-[13px] font-medium text-[#111827] max-w-[120px] truncate">
@@ -211,7 +204,7 @@ export default function Header() {
               ) : (
                 <Link
                   href="/auth/login"
-                  className="flex items-center gap-1.5 h-10 px-4 bg-[#1A4F9C] text-white text-[13px] font-semibold rounded-lg hover:bg-[#143E7A] transition-colors"
+                  className="flex items-center gap-1.5 h-10 px-4 bg-accent text-white text-[13px] font-semibold rounded-lg hover:bg-accent/90 transition-colors"
                 >
                   <User className="w-4 h-4" />
                   Sign In
@@ -222,50 +215,6 @@ export default function Header() {
         </div>
       </div>
 
-      {/* Mobile nav menu */}
-      {mobileOpen && (
-        <div className="md:hidden bg-white border-t border-[#E5E7EB] px-6 py-4 flex flex-col gap-1">
-          {NAV.map((item) => (
-            <Link
-              key={item.label}
-              href={item.href}
-              onClick={() => setMobileOpen(false)}
-              className="py-2.5 text-sm font-medium text-[#111827] hover:text-[#1A4F9C] transition-colors"
-            >
-              {item.label}
-            </Link>
-          ))}
-
-          {!loading && (
-            <>
-              {user ? (
-                <>
-                  <div className="mt-2 py-2 border-t border-[#F3F4F6]">
-                    <p className="text-[11px] text-[#6B7280]">Signed in as</p>
-                    <p className="text-[13px] font-semibold text-[#111827] truncate">{user.email}</p>
-                  </div>
-                  <button
-                    onClick={() => { setMobileOpen(false); handleLogout(); }}
-                    disabled={isLoggingOut}
-                    className="flex items-center gap-2 py-2.5 text-sm font-semibold text-[#DC2626] disabled:opacity-50"
-                  >
-                    <LogOut className="w-4 h-4" />
-                    {isLoggingOut ? "Signing out..." : "Sign Out"}
-                  </button>
-                </>
-              ) : (
-                <Link
-                  href="/auth/login"
-                  onClick={() => setMobileOpen(false)}
-                  className="mt-2 py-2.5 text-sm font-semibold text-[#1A4F9C]"
-                >
-                  Sign In
-                </Link>
-              )}
-            </>
-          )}
-        </div>
-      )}
     </header>
   );
 }

@@ -62,7 +62,7 @@ export default function ComparePage() {
               <p className="text-[12px] font-bold text-[#111827] text-center leading-tight mt-1 min-h-8 line-clamp-2">
                 {p.name}
               </p>
-              <p className="text-sm font-bold text-[#1A4F9C] mt-1.5">{p.priceLabel}</p>
+              <p className="text-sm font-bold text-accent mt-1.5">{p.priceLabel}</p>
             </div>
           ))}
         </div>

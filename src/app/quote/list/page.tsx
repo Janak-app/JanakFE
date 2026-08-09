@@ -52,7 +52,7 @@ export default function QuoteListPage() {
                     <p className="text-[13px] font-semibold text-[#111827] leading-snug line-clamp-2">{q.productName}</p>
                     <div className="flex items-baseline gap-1.5 mt-1.5">
                       <span className="text-[11px] text-[#6B7280]">Quoted</span>
-                      <span className="text-[15px] font-bold text-[#1A4F9C]">{q.quotedPriceLabel}</span>
+                      <span className="text-[15px] font-bold text-accent">{q.quotedPriceLabel}</span>
                     </div>
                     <p className="text-[11px] text-[#F59E0B] mt-0.5">Valid until {q.validUntil}</p>
                   </div>

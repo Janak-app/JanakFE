@@ -1,10 +1,10 @@
 apply plugin: 'com.android.application'
 
 android {
-    namespace "com.janakpositioning.app"
+    namespace "com.janakpositioning.janakglobal"
     compileSdk rootProject.ext.compileSdkVersion
     defaultConfig {
-        applicationId "com.janakpositioning.app"
+        applicationId "com.janakpositioning.janakglobal"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
@@ -16,8 +16,23 @@ android {
             ignoreAssetsPattern '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
+    signingConfigs {
+        release {
+            def keystorePath = System.getenv("JANAK_KEYSTORE_PATH")
+            def keystorePassword = System.getenv("JANAK_STORE_PASSWORD")
+            def keyAlias = System.getenv("JANAK_KEY_ALIAS") ?: "janak"
+            def keyPassword = System.getenv("JANAK_KEY_PASSWORD")
+            if (keystorePath && keystorePassword && keyPassword) {
+                storeFile file(keystorePath)
+                storePassword keystorePassword
+                keyAlias keyAlias
+                keyPassword keyPassword
+            }
+        }
+    }
     buildTypes {
         release {
+            signingConfig signingConfigs.release
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }

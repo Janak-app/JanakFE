@@ -23,7 +23,7 @@ export default function CtaBanner() {
         <div className="flex flex-wrap gap-3 shrink-0">
           <Link
             href="/quote"
-            className="inline-flex items-center gap-2 bg-white text-[#1A4F9C] font-bold text-sm px-5 py-3 rounded-lg hover:bg-white/90 transition-colors"
+            className="inline-flex items-center gap-2 bg-white text-accent font-bold text-sm px-5 py-3 rounded-lg hover:bg-white/90 transition-colors"
           >
             Request a Quote <ArrowRight className="w-4 h-4" />
           </Link>

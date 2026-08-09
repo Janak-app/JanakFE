@@ -43,7 +43,7 @@ export default function ServiceDetailClient() {
       <div className="max-w-3xl mx-auto px-4 py-4 pb-10 flex flex-col gap-4">
         {/* Banner */}
         <div className="bg-[#EFF6FF] border border-[#DBEAFE] rounded-xl p-4 flex items-center gap-4">
-          <div className="w-14 h-14 rounded-2xl bg-[#1A4F9C] flex items-center justify-center shrink-0">
+          <div className="w-14 h-14 rounded-2xl bg-accent flex items-center justify-center shrink-0">
             <Wrench className="w-7 h-7 text-white" />
           </div>
           <div>

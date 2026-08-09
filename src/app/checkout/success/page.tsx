@@ -1,10 +1,12 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { CheckCircle2, Copy, Download, ChevronRight } from "lucide-react";
+import { Copy, Download, ChevronRight, Loader2 } from "lucide-react";
 import { useToast } from "@/context/ToastContext";
 import { formatINR } from "@/data/products";
+import { usePaymentStatus } from "@/hooks/usePaymentStatus";
 
 const ORDER_ID = "000085752257";
 const NET_PAYABLE = 1100500;
@@ -20,6 +22,46 @@ const MOCK_ITEMS = [
 export default function OrderConfirmationPage() {
   const router = useRouter();
   const { show } = useToast();
+
+  const [merchantTxnNo, setMerchantTxnNo] = useState<string | null>(null);
+
+  useEffect(() => {
+    const txnNo = sessionStorage.getItem("merchantTxnNo");
+    if (txnNo) {
+      sessionStorage.removeItem("merchantTxnNo");
+      setMerchantTxnNo(txnNo);
+    }
+  }, []);
+
+  const { status, loading: statusLoading, error: statusError } = usePaymentStatus({ merchantTxnNo });
+
+  // Show spinner while polling
+  if (merchantTxnNo && (statusLoading || status === "PENDING" || status === null)) {
+    return (
+      <div className="min-h-screen bg-white flex flex-col items-center justify-center gap-4">
+        <Loader2 className="w-10 h-10 text-accent animate-spin" />
+        <p className="text-[15px] font-semibold text-[#374151]">Confirming your payment…</p>
+      </div>
+    );
+  }
+
+  // Show error if payment failed or status check errored
+  if (merchantTxnNo && (status === "FAILED" || statusError)) {
+    return (
+      <div className="min-h-screen bg-white flex flex-col items-center justify-center gap-4 px-6 text-center">
+        <p className="text-[20px] font-bold text-[#DC2626]">Payment Failed</p>
+        <p className="text-[14px] text-[#6B7280]">
+          We could not confirm your payment. Please try again.
+        </p>
+        <button
+          onClick={() => router.push("/checkout")}
+          className="mt-2 px-6 py-3 bg-accent text-white text-[14px] font-semibold rounded-xl"
+        >
+          Try Again
+        </button>
+      </div>
+    );
+  }
 
   const handleCopyOrderId = () => {
     navigator.clipboard.writeText(ORDER_ID);
@@ -42,21 +84,13 @@ export default function OrderConfirmationPage() {
 
       {/* ── Order Confirmation header ── */}
       <div className="px-4 flex items-center gap-4 mb-6">
-        <CheckCircle2 className="w-16 h-16 text-[#16A34A] fill-[#16A34A] shrink-0" style={{ color: "white" }}
-          /* Use a stacked approach for the badge look */
+        <Image
+          src="/common/success-tick.svg"
+          alt="Order confirmed"
+          width={72}
+          height={72}
+          className="shrink-0"
         />
-        {/* Badge icon — green seal with white check */}
-        <div className="relative w-16 h-16 shrink-0 -ml-16">
-          <div className="w-16 h-16 rounded-full bg-[#16A34A] flex items-center justify-center shadow-lg">
-            <svg viewBox="0 0 64 64" className="w-16 h-16 absolute inset-0">
-              <path
-                d="M32 2 L36.5 10 L46 8 L46 18 L55 22 L50 30 L55 38 L46 42 L46 52 L36.5 50 L32 58 L27.5 50 L18 52 L18 42 L9 38 L14 30 L9 22 L18 18 L18 8 L27.5 10 Z"
-                fill="#16A34A"
-              />
-              <polyline points="20,32 28,40 44,24" fill="none" stroke="white" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </div>
-        </div>
         <div>
           <h1 className="text-[26px] font-extrabold text-[#111827] leading-tight">
             Order<br />Confirmation
@@ -98,9 +132,9 @@ export default function OrderConfirmationPage() {
                     />
                   </div>
                   <div>
-                    <p className="text-[12px] font-semibold text-[#1A4F9C] mb-1">{item.category}</p>
+                    <p className="text-[12px] font-semibold text-accent mb-1">{item.category}</p>
                     <p className="text-[15px] font-bold text-[#111827] mb-1">{item.name}</p>
-                    <p className="text-[13px] font-semibold text-[#1A4F9C]">Quantity - {item.quantity}</p>
+                    <p className="text-[13px] font-semibold text-accent">Quantity - {item.quantity}</p>
                   </div>
                 </div>
                 {i < MOCK_ITEMS.length - 1 && <div className="h-px bg-[#E5E7EB] mx-4" />}
@@ -150,7 +184,7 @@ export default function OrderConfirmationPage() {
               onClick={() => show("Bank details coming soon", "info")}
               className="flex items-center justify-between w-full pt-3 border-t border-[#E5E7EB]"
             >
-              <span className="text-[13px] font-semibold text-[#1A4F9C]">View bank details for payment</span>
+              <span className="text-[13px] font-semibold text-accent">View bank details for payment</span>
               <ChevronRight className="w-4 h-4 text-[#6B7280]" />
             </button>
           </div>
@@ -177,7 +211,7 @@ export default function OrderConfirmationPage() {
             <div className="border-t border-dashed border-[#E5E7EB] mt-4 pt-3">
               <button
                 onClick={() => router.push("/checkout/address")}
-                className="w-full text-center text-[13px] font-semibold text-[#1A4F9C]"
+                className="w-full text-center text-[13px] font-semibold text-accent"
               >
                 Change delivery address
               </button>

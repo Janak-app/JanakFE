@@ -107,7 +107,7 @@ function ExploreContent() {
                 onClick={() => setTab(t.key)}
                 className={`px-4 py-1.5 rounded-full text-[13px] font-medium whitespace-nowrap shrink-0 transition-colors ${
                   active
-                    ? "bg-[#1A4F9C] text-white"
+                    ? "bg-accent text-white"
                     : "bg-white text-[#6B7280] border border-[#E5E7EB]"
                 }`}
               >
@@ -162,8 +162,8 @@ function ExploreContent() {
                   onClick={() => setTab(t.key)}
                   className={`px-3.5 py-2 rounded-full text-xs font-medium border transition-colors ${
                     active
-                      ? "bg-[#1A4F9C] text-white border-[#1A4F9C]"
-                      : "bg-white text-[#6B7280] border-[#E5E7EB] hover:border-[#1A4F9C]"
+                      ? "bg-accent text-white border-accent"
+                      : "bg-white text-[#6B7280] border-[#E5E7EB] hover:border-accent"
                   }`}
                 >
                   {t.label}
@@ -174,7 +174,7 @@ function ExploreContent() {
 
           <button
             onClick={() => setShowFilter(true)}
-            className="flex items-center gap-2 h-10 px-4 rounded-lg border border-[#E5E7EB] bg-white text-[13px] font-semibold text-[#1A4F9C] hover:bg-[#F5F5F7] transition-colors ml-auto"
+            className="flex items-center gap-2 h-10 px-4 rounded-lg border border-[#E5E7EB] bg-white text-[13px] font-semibold text-accent hover:bg-[#F5F5F7] transition-colors ml-auto"
           >
             <SlidersHorizontal className="w-4 h-4" />
             More Filters

@@ -13,7 +13,8 @@ const TABS = [
 export default function BottomTabBar() {
   const pathname = usePathname();
 
-  if (pathname.startsWith("/auth")) return null;
+  const SHOW_TAB_ROUTES = ["/", "/explore"];
+  if (!SHOW_TAB_ROUTES.includes(pathname)) return null;
 
   return (
     <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-[#E5E7EB] flex items-stretch">
@@ -29,7 +30,7 @@ export default function BottomTabBar() {
             <Icon
               className={`w-6 h-6 ${active ? "text-accent" : "text-[#9CA3AF]"}`}
               strokeWidth={active ? 2.2 : 1.8}
-              fill={active && label === "Home" ? "#943C3C" : "none"}
+              fill="none"
             />
             <span className={`text-[11px] font-medium leading-none ${active ? "text-accent" : "text-[#9CA3AF]"}`}>
               {label}

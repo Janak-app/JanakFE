@@ -40,8 +40,8 @@ const NAV_LINKS = {
 };
 
 const LEGAL_LINKS = [
-  { label: "Privacy Policy", href: "/" },
-  { label: "Terms of Service", href: "/" },
+  { label: "Privacy Policy", href: "/privacy-policy" },
+  { label: "Terms of Service", href: "/terms" },
   { label: "Cookie Settings", href: "/" },
   { label: "GST Information", href: "/" },
   { label: "Sitemap", href: "/" },
@@ -60,7 +60,7 @@ export default function Footer() {
   return (
     <footer className="bg-[#0a1628] text-white mt-auto">
       {/* Newsletter strip */}
-      <div className="bg-[#1A4F9C]">
+      <div className="bg-accent">
         <div className="max-w-7xl mx-auto px-6 py-8 flex flex-col md:flex-row items-center justify-between gap-6">
           <div>
             <p className="text-lg font-bold text-white mb-1">Stay ahead of the survey curve</p>
@@ -82,7 +82,7 @@ export default function Footer() {
             />
             <button
               type="submit"
-              className="inline-flex items-center gap-2 bg-white text-[#1A4F9C] font-bold text-sm px-5 py-2.5 rounded-lg hover:bg-white/90 transition-colors shrink-0"
+              className="inline-flex items-center gap-2 bg-white text-accent font-bold text-sm px-5 py-2.5 rounded-lg hover:bg-white/90 transition-colors shrink-0"
             >
               Subscribe <ArrowRight className="w-4 h-4" />
             </button>
@@ -97,7 +97,7 @@ export default function Footer() {
           <div className="md:col-span-1">
             {/* Logo */}
             <div className="flex items-center gap-2.5 mb-4">
-              <div className="w-9 h-9 rounded-[9px] bg-[#1A4F9C] flex items-center justify-center">
+              <div className="w-9 h-9 rounded-[9px] bg-accent flex items-center justify-center">
                 <MapPin className="w-5 h-5 text-white" />
               </div>
               <div>
@@ -177,7 +177,7 @@ export default function Footer() {
               <ShieldCheck className="w-3 h-3" /> ISO 9001:2015
             </span>
             <span className="inline-flex items-center gap-1 bg-gray-800 border border-gray-700 text-gray-300 rounded px-2 py-0.5 font-semibold">
-              <BadgeCheck className="w-3 h-3 text-[#1A4F9C]" /> Authorized Dealer
+              <BadgeCheck className="w-3 h-3 text-accent" /> Authorized Dealer
             </span>
           </div>
         </div>

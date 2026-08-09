@@ -53,7 +53,7 @@ export default function CheckoutAddressPage() {
 
         {addressesLoading ? (
           <div className="flex items-center justify-center py-12">
-            <Loader2 className="w-7 h-7 text-[#1A4F9C] animate-spin" />
+            <Loader2 className="w-7 h-7 text-accent animate-spin" />
           </div>
         ) : (
           <div className="flex flex-col gap-2.5">
@@ -64,16 +64,16 @@ export default function CheckoutAddressPage() {
                   key={addr.id}
                   onClick={() => setSelected(addr.id)}
                   className={`w-full text-left p-3.5 rounded-xl border transition-colors ${
-                    active ? "border-[#1A4F9C] bg-[#EFF6FF]" : "border-[#E5E7EB] bg-white"
+                    active ? "border-accent bg-[#EFF6FF]" : "border-[#E5E7EB] bg-white"
                   }`}
                 >
                   <div className="flex gap-3">
                     <div
                       className={`w-5 h-5 rounded-full border-2 flex items-center justify-center mt-0.5 shrink-0 ${
-                        active ? "border-[#1A4F9C]" : "border-[#D1D5DB]"
+                        active ? "border-accent" : "border-[#D1D5DB]"
                       }`}
                     >
-                      {active && <div className="w-2.5 h-2.5 rounded-full bg-[#1A4F9C]" />}
+                      {active && <div className="w-2.5 h-2.5 rounded-full bg-accent" />}
                     </div>
                     <div>
                       <div className="flex items-center gap-2 mb-1">
@@ -101,14 +101,14 @@ export default function CheckoutAddressPage() {
 
         <button
           onClick={() => setShowForm(true)}
-          className="flex items-center gap-2.5 w-full p-3.5 mt-3 rounded-xl border-2 border-dashed border-[#1A4F9C]"
+          className="flex items-center gap-2.5 w-full p-3.5 mt-3 rounded-xl border-2 border-dashed border-accent"
         >
-          <Plus className="w-5 h-5 text-[#1A4F9C]" />
-          <span className="text-[13px] font-semibold text-[#1A4F9C]">Add New Address</span>
+          <Plus className="w-5 h-5 text-accent" />
+          <span className="text-[13px] font-semibold text-accent">Add New Address</span>
         </button>
 
         <div className="flex items-center gap-2.5 p-3 bg-[#E0F2FE] rounded-lg mt-5">
-          <Clock className="w-4 h-4 text-[#1A4F9C] shrink-0" />
+          <Clock className="w-4 h-4 text-accent shrink-0" />
           <div>
             <p className="text-xs font-semibold text-[#111827]">Estimated Delivery: 5–8 business days</p>
             <p className="text-[11px] text-[#6B7280] mt-0.5">Free shipping on orders above ₹50,000</p>

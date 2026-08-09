@@ -24,7 +24,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const bg =
-    type === "success" ? "bg-[#111827]" : type === "error" ? "bg-[#DC2626]" : "bg-[#1A4F9C]";
+    type === "success" ? "bg-[#111827]" : type === "error" ? "bg-[#DC2626]" : "bg-accent";
 
   const Icon = type === "success" ? CheckCircle : type === "error" ? XCircle : Info;
 

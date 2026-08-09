@@ -1,5 +1,7 @@
 import { NextRequest } from "next/server";
 
+export const dynamic = "force-static";
+
 export async function GET(req: NextRequest) {
   const url = req.nextUrl.searchParams.get("url");
   if (!url) return new Response("Missing url", { status: 400 });

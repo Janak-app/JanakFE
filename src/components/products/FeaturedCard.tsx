@@ -12,7 +12,7 @@ export default function FeaturedCard({ product }: { product: Product }) {
       <div className="relative h-48 bg-[#F3F4F6] overflow-hidden">
         {product.images[0] && (
           <Image
-            src={`/api/img?url=${encodeURIComponent(product.images[0])}`}
+            src={product.images[0]}
             alt={product.name}
             fill
             className="object-contain p-4 group-hover:scale-105 transition-transform duration-300"

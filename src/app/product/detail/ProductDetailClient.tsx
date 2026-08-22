@@ -101,7 +101,7 @@ export default function ProductDetailClient() {
         <div className="bg-[#F5F5F7] relative overflow-hidden">
           <div className="relative h-72 md:h-96">
             <Image
-              src={`/api/img?url=${encodeURIComponent(product.images[imgIdx])}`}
+              src={product.images[imgIdx]}
               alt={product.name}
               fill
               className="object-contain"
@@ -124,7 +124,7 @@ export default function ProductDetailClient() {
                   onClick={() => setImgIdx(i)}
                   className={`relative shrink-0 w-14 h-14 rounded-lg overflow-hidden border-2 transition-colors ${i === imgIdx ? "border-accent" : "border-transparent"}`}
                 >
-                  <Image src={`/api/img?url=${encodeURIComponent(img)}`} alt="" fill className="object-cover" />
+                  <Image src={img} alt="" fill className="object-cover" />
                 </button>
               ))}
             </div>

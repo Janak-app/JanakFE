@@ -1,7 +1,7 @@
 "use client";
 
 import Header from "@/components/layout/Header";
-// import Footer from "@/components/layout/Footer";
+import Footer from "@/components/layout/Footer";
 import HeroBanner from "@/components/home/HeroBanner";
 import TrustedBrands from "@/components/home/TrustedBrands";
 import WhyJanak from "@/components/home/WhyJanak";
@@ -10,7 +10,8 @@ import FeaturedProducts from "@/components/home/FeaturedProducts";
 import NewArrivals from "@/components/home/NewArrivals";
 import Testimonials from "@/components/home/Testimonials";
 import AboutSection from "@/components/home/AboutSection";
-// import CtaBanner from "@/components/home/CtaBanner";
+import CtaBanner from "@/components/home/CtaBanner";
+import PayRemainingBanner from "@/components/home/PayRemainingBanner";
 
 export default function HomePage() {
   return (
@@ -22,9 +23,9 @@ export default function HomePage() {
         <HeroBanner />
 
         {/* Trusted brands — desktop only */}
-        {/* <div className="hidden md:block"> */}
+        <div className="hidden md:block">
           <TrustedBrands />
-        {/* </div> */}
+        </div>
 
         {/* Why Janak — desktop only */}
         <div className="hidden md:block">
@@ -51,10 +52,15 @@ export default function HomePage() {
         <NewArrivals />
 
         {/* CTA */}
-        {/* <CtaBanner /> */}
+        <CtaBanner />
       </main>
 
-      {/* <Footer /> */}
+      {/* Pay Remaining Amount — mobile fixed banner above bottom tab bar */}
+      <PayRemainingBanner />
+
+      <div className="hidden md:block">
+        <Footer />
+      </div>
     </div>
   );
 }

@@ -1,9 +1,9 @@
 "use client";
 
-// import { useState } from "react";
-// import { Mail, Lock, Eye, EyeOff } from "lucide-react";
-// import { useForm } from "react-hook-form";
-// import { zodResolver } from "@hookform/resolvers/zod";
+import { useState } from "react";
+import { Mail, Lock, Eye, EyeOff } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -15,13 +15,17 @@ const loginSchema = z.object({
   password: z.string().min(1, "Password is required"),
 });
 
-// type LoginFormData = z.infer<typeof loginSchema>;
+type LoginFormData = z.infer<typeof loginSchema>;
 
-// interface LoginPayload {
-//   email: string;
-//   password: string;
-//   [key: string]: unknown;
-// }
+interface LoginPayload {
+  email: string;
+  password: string;
+  [key: string]: unknown;
+}
+
+interface LoginResponse {
+  accessToken: string;
+}
 
 interface GuestLoginData {
   accessToken: string;
@@ -31,25 +35,25 @@ interface GuestLoginData {
 
 export default function LoginForm() {
   const router = useRouter();
-  const { setUser } = useAuth();
-  // const [showPassword, setShowPassword] = useState(false);
+  const { setUser, refetch } = useAuth();
+  const [showPassword, setShowPassword] = useState(false);
 
-  // const {
-  //   register,
-  //   handleSubmit,
-  //   formState: { errors, isValid },
-  // } = useForm<LoginFormData>({
-  //   resolver: zodResolver(loginSchema),
-  //   mode: "onChange",
-  // });
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isValid },
+  } = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+    mode: "onChange",
+  });
 
-  // const { mutateAsync: login, isPending } = useMutationApi<
-  //   LoginResponse,
-  //   LoginPayload
-  // >({
-  //   endpoint: "v1/auth/login",
-  //   method: "POST",
-  // });
+  const { mutateAsync: login, isPending } = useMutationApi<
+    LoginResponse,
+    LoginPayload
+  >({
+    endpoint: "v1/auth/login",
+    method: "POST",
+  });
 
   const { mutateAsync: continueAsGuest, isPending: isGuestPending } = useMutationApi<
     GuestLoginData,
@@ -74,18 +78,18 @@ export default function LoginForm() {
     }
   };
 
-  // const onSubmit = async (data: LoginFormData) => {
-  //   try {
-  //     const res = await login({ email: data.email, password: data.password });
-  //     if (res?.accessToken) {
-  //       localStorage.setItem("accessToken", res.accessToken);
-  //     }
-  //     await refetchMe();
-  //     router.push("/");
-  //   } catch {
-  //     // error handled by useMutationApi via toast
-  //   }
-  // };
+  const onSubmit = async (data: LoginFormData) => {
+    try {
+      const res = await login({ email: data.email, password: data.password });
+      if (res?.accessToken) {
+        localStorage.setItem("accessToken", res.accessToken);
+      }
+      await refetch();
+      router.push("/");
+    } catch {
+      // error handled by useMutationApi via toast
+    }
+  };
 
   return (
     <div className="w-full max-w-sm mx-auto">
@@ -96,9 +100,9 @@ export default function LoginForm() {
         Sign in to access your dashboard, orders, and exclusive trade pricing.
       </p>
 
-      {/* <form onSubmit={handleSubmit(onSubmit)} className="space-y-5"> */}
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
         {/* Email */}
-        {/* <div>
+        <div>
           <label className="block text-sm font-medium text-gray-800 mb-1.5">
             Work Email
           </label>
@@ -118,10 +122,10 @@ export default function LoginForm() {
           {errors.email && (
             <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>
           )}
-        </div> */}
+        </div>
 
         {/* Password */}
-        {/* <div>
+        <div>
           <label className="block text-sm font-medium text-gray-800 mb-1.5">
             Password
           </label>
@@ -153,16 +157,16 @@ export default function LoginForm() {
           {errors.password && (
             <p className="text-red-500 text-xs mt-1">{errors.password.message}</p>
           )}
-        </div> */}
+        </div>
 
-        {/* <button
+        <button
           type="submit"
           disabled={!isValid || isPending}
-          className="w-full bg-[#1e3a5f] hover:bg-[#162f4e] active:bg-[#112540] disabled:opacity-50 text-white font-semibold py-4 rounded-xl text-base transition-colors mt-1"
+          className="w-full bg-accent hover:bg-[#7a3232] active:bg-[#6b2a2a] disabled:opacity-50 text-white font-semibold py-4 rounded-xl text-base transition-colors mt-1"
         >
           {isPending ? "Signing In..." : "Log In"}
         </button>
-      </form> */}
+      </form>
 
       <button
         type="button"
@@ -173,7 +177,7 @@ export default function LoginForm() {
         {isGuestPending ? "Loading..." : "Continue as Guest →"}
       </button>
 
-      {/* <div className="w-full text-center text-sm text-gray-500 mt-3">
+      <div className="w-full text-center text-sm text-gray-500 mt-3">
         <span>Don&apos;t have an account? </span>
         <button
           type="button"
@@ -182,7 +186,7 @@ export default function LoginForm() {
         >
           Create Account →
         </button>
-      </div> */}
+      </div>
     </div>
   );
 }

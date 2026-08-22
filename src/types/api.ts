@@ -74,6 +74,8 @@ export type ApiCartSummary = {
   discountAmount: number;
   shippingAmount: number;
   totalAmount: number;
+  advanceAmount: number;
+  balanceAmount: number;
 };
 
 export type ApiCart = {

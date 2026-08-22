@@ -3,16 +3,16 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
-  /*Receipt, FileText, Wrench, Heart, Cpu, Download,
-  Bell, MessageSquare, GitCompare,*/ LogOut, ChevronRight, ShieldCheck, ScrollText, ChevronLeft,
+  Receipt, FileText, Wrench, Heart, Cpu, Download,
+  Bell, MessageSquare, GitCompare, LogOut, ChevronRight, ShieldCheck, ScrollText, ChevronLeft,
 } from "lucide-react";
 import Header from "@/components/layout/Header";
-// import { useToast } from "@/context/ToastContext";
+import { useToast } from "@/context/ToastContext";
 import { useAuth } from "@/context/AuthContext";
 
 export default function ProfilePage() {
   const router = useRouter();
-  // const { show } = useToast();
+  const { show } = useToast();
   const { user } = useAuth();
 
   const initials = user?.email?.slice(0, 2).toUpperCase() ?? "?";
@@ -26,19 +26,21 @@ export default function ProfilePage() {
   };
 
   const menu = [
-    // { icon: Receipt, label: "My Orders", sub: "3 orders", href: "/orders" },
-    // { icon: FileText, label: "My Quotes", sub: "1 active", badge: "1", href: "/quote/list" },
-    // { icon: Wrench, label: "My Service Requests", sub: "1 confirmed", href: "/service/list" },
-    // { icon: Heart, label: "My Wishlist", sub: "No items saved", onClick: () => show("No saved items yet", "info") },
-    // { icon: Cpu, label: "My Equipment", sub: "1 registered", onClick: () => show("Equipment registry — coming soon", "info") },
-    // { icon: Download, label: "Download Invoices", onClick: () => show("Preparing download...", "info") },
-    // { icon: Bell, label: "Notification Preferences", href: "/notifications" },
-    // { icon: MessageSquare, label: "Contact Support", sub: "Mon–Sat · 9AM–6PM", href: "/chat" },
+    { icon: Receipt, label: "My Orders", sub: "3 orders", href: "/orders" },
+    { icon: FileText, label: "My Quotes", sub: "1 active", badge: "1", href: "/quote/list" },
+    { icon: Wrench, label: "My Service Requests", sub: "1 confirmed", href: "/service/list" },
+    { icon: Heart, label: "My Wishlist", sub: "No items saved", onClick: () => show("No saved items yet", "info") },
+    { icon: Cpu, label: "My Equipment", sub: "1 registered", onClick: () => show("Equipment registry — coming soon", "info") },
+    { icon: Download, label: "Download Invoices", onClick: () => show("Preparing download...", "info") },
+    { icon: Bell, label: "Notification Preferences", href: "/notifications" },
+    { icon: MessageSquare, label: "Contact Support", sub: "Mon–Sat · 9AM–6PM", href: "/chat" },
   ] as const;
 
   return (
     <div className="min-h-screen bg-[#F5F5F7]">
-      <Header />
+      <div className="hidden md:block">
+        <Header />
+      </div>
 
       <div className="max-w-3xl mx-auto">
         {/* Header */}
@@ -73,7 +75,7 @@ export default function ProfilePage() {
         </div>
 
         {/* Compare CTA */}
-        {/* <Link
+        <Link
           href="/compare"
           className="mx-4 mt-3 bg-white border border-[#E5E7EB] rounded-xl p-3.5 flex items-center gap-3 hover:shadow-sm transition-shadow"
         >
@@ -85,10 +87,10 @@ export default function ProfilePage() {
             <p className="text-xs text-[#6B7280] mt-0.5">Compare specs side-by-side</p>
           </div>
           <ChevronRight className="w-4 h-4 text-[#9CA3AF]" />
-        </Link> */}
+        </Link>
 
         {/* Menu */}
-        {/* <div className="mx-4 mt-3 bg-white border border-[#E5E7EB] rounded-xl overflow-hidden">
+        <div className="mx-4 mt-3 bg-white border border-[#E5E7EB] rounded-xl overflow-hidden">
           {menu.map((m, idx) => {
             const Icon = m.icon;
             const isLast = idx === menu.length - 1;
@@ -118,7 +120,7 @@ export default function ProfilePage() {
               </button>
             );
           })}
-        </div> */}
+        </div>
 
         {/* Legal */}
         <div className="mx-4 mt-3 bg-white border border-[#E5E7EB] rounded-xl overflow-hidden">
@@ -151,9 +153,9 @@ export default function ProfilePage() {
           </button>
         </div>
 
-        {/* <p className="text-center text-[11px] text-[#9CA3AF] mt-5 mb-8 tracking-wide">
+        <p className="text-center text-[11px] text-[#9CA3AF] mt-5 mb-8 tracking-wide">
           Janak Positioning · v1.0.0 (Prototype)
-        </p> */}
+        </p>
       </div>
     </div>
   );

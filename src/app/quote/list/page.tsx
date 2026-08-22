@@ -9,7 +9,9 @@ import { quotes } from "@/data/quotes";
 export default function QuoteListPage() {
   return (
     <div className="min-h-screen bg-white">
-      <Header />
+      <div className="hidden md:block">
+        <Header />
+      </div>
 
       <div className="max-w-4xl mx-auto px-6 pt-0 pb-8">
         <div className="bg-white border border-t-0 border-[#E5E7EB] rounded-b-2xl overflow-hidden">

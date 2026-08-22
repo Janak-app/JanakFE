@@ -1,25 +1,39 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { ShoppingCart, ChevronLeft, BadgePercent, Loader2 } from "lucide-react";
+import { ShoppingCart, ChevronLeft, BadgePercent, Loader2, Trash2 } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { useToast } from "@/context/ToastContext";
 import { formatINR } from "@/data/products";
 import AddressBottomSheet from "@/components/cart/AddressBottomSheet";
 import { SavedAddress } from "@/components/checkout/AddressForm";
-
-const BOOKING_AMOUNT = 50000;
+import useFetchApi from "@/hooks/useFetchApi";
 
 export default function CartPage() {
   const router = useRouter();
-  const { items, serverItems, updateQty, subtotal, cartCount, cartLoading } = useCart();
+  const { items, serverItems, updateQty, removeItem, summary, cartCount, cartLoading, refetchCart } = useCart();
   const { show } = useToast();
   const [addressSheetOpen, setAddressSheetOpen] = useState(false);
   const [selectedAddress, setSelectedAddress] = useState<SavedAddress | null>(null);
 
-  const offerDiscount = Math.round(subtotal * 0.12);
-  const netPayable = subtotal - offerDiscount;
+  const { data: addresses } = useFetchApi<SavedAddress[]>({
+    endpoint: "v1/addresses",
+    cacheEnabled: false,
+  });
+
+  useEffect(() => {
+    refetchCart();
+  }, []);
+
+  // Auto-select default address (or first) on load
+  useEffect(() => {
+    if (!addresses?.length || selectedAddress) return;
+    const def = addresses.find((a) => a.isDefault) ?? addresses[0];
+    setSelectedAddress(def);
+  }, [addresses]);
+
+  const { subtotal, gstAmount, discountAmount, totalAmount, advanceAmount } = summary;
   const empty = !cartLoading && items.length === 0;
 
   return (
@@ -58,7 +72,7 @@ export default function CartPage() {
             {/* ── Deliver To ── */}
             <div className="px-4 py-4">
               <p className="text-[15px] font-bold text-[#111827] mb-3">
-                Deliver To : {selectedAddress ? selectedAddress.fullName : "Dhruv Bhatia"}
+                Deliver To{selectedAddress ? ` : ${selectedAddress.fullName}` : ""}
               </p>
               <div className="flex items-start justify-between gap-4">
                 <p className="text-[14px] text-[#374151] leading-snug">
@@ -69,7 +83,7 @@ export default function CartPage() {
                       {selectedAddress.city}, {selectedAddress.state} — {selectedAddress.pincode}
                     </>
                   ) : (
-                    <>311, Sunlight Apartment, Sector 44<br />Noida, 247667</>
+                    <span className="text-[#9CA3AF]">No address selected</span>
                   )}
                 </p>
                 <button
@@ -108,7 +122,7 @@ export default function CartPage() {
                         />
                       </div>
 
-                      {/* Middle: category + name */}
+                      {/* Middle: category + name + remove */}
                       <div className="flex-1 min-w-0 flex flex-col gap-0.5 pt-0.5">
                         <span className="text-[11px] font-semibold text-[#0EA5E9]">
                           {product.category?.name ?? "Product"}
@@ -116,6 +130,14 @@ export default function CartPage() {
                         <p className="text-[14px] font-bold text-[#111827] leading-snug line-clamp-3">
                           {product.name}
                         </p>
+                        <button
+                          onClick={() => removeItem(it.productId)}
+                          className="mt-1.5 flex items-center gap-1 text-[12px] font-semibold text-[#DC2626] w-fit"
+                          aria-label="Remove item"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                          Remove
+                        </button>
                       </div>
 
                       {/* Right: stepper + price stacked */}
@@ -142,7 +164,7 @@ export default function CartPage() {
                         {/* Price */}
                         <div className="flex flex-col items-center">
                           <span className="text-[13px] font-bold text-[#111827]">
-                            {price ? formatINR(price * it.quantity) : "—"}
+                            {price ? formatINR(price * it.quantity) : "Price on Request"}
                           </span>
                           {originalPrice > 0 && (
                             <span className="text-[11px] text-[#9CA3AF] line-through">
@@ -190,13 +212,16 @@ export default function CartPage() {
             <div className="px-4 py-4 flex flex-col gap-4">
               <p className="text-[15px] font-bold text-[#111827]">Price Detail ({cartCount} Items)</p>
 
-              <PriceRow label="Total MRP" amount={formatINR(subtotal)} />
-              <PriceRow
-                label="Offer Discount"
-                amount={`-${formatINR(offerDiscount)}`}
-                amountClass="text-[#DC2626]"
-              />
-              <PriceRow label="Net Payable Amount" amount={formatINR(netPayable)} />
+              <PriceRow label="Subtotal (excl. GST)" amount={formatINR(subtotal)} />
+              <PriceRow label="GST" amount={formatINR(gstAmount)} />
+              {discountAmount > 0 && (
+                <PriceRow
+                  label="Discount"
+                  amount={`-${formatINR(discountAmount)}`}
+                  amountClass="text-[#DC2626]"
+                />
+              )}
+              <PriceRow label="Net Payable Amount" amount={formatINR(totalAmount)} />
 
               {/* Book this at just */}
               <div className="flex items-center gap-3 border border-[#E5E7EB] rounded-2xl p-4 mt-1">
@@ -206,7 +231,7 @@ export default function CartPage() {
                 <div>
                   <p className="text-[14px] font-bold text-[#111827]">
                     Book this at just{" "}
-                    <span className="text-accent">{formatINR(BOOKING_AMOUNT)}</span>
+                    <span className="text-accent">{formatINR(advanceAmount)}</span>
                   </p>
                   <p className="text-[12px] text-[#6B7280] mt-0.5">Pay remaining amount after order confirmation</p>
                 </div>
@@ -220,7 +245,7 @@ export default function CartPage() {
               onClick={() => router.push("/checkout")}
               className="w-full h-13 bg-accent text-white text-[15px] font-bold rounded-xl py-3.5"
             >
-              Continue Payment - {formatINR(BOOKING_AMOUNT)}
+              Continue Payment - {formatINR(advanceAmount)}
             </button>
           </div>
         </>

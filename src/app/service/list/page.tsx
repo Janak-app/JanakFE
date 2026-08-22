@@ -9,7 +9,9 @@ import { serviceRequests } from "@/data/quotes";
 export default function ServiceListPage() {
   return (
     <div className="min-h-screen bg-[#F5F5F7]">
-      <Header />
+      <div className="hidden md:block">
+        <Header />
+      </div>
 
       <div className="bg-white border-b border-[#E5E7EB]">
         <div className="max-w-3xl mx-auto px-4 pt-5 pb-3 flex items-center justify-between">

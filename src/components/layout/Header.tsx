@@ -8,6 +8,9 @@ import { /* ShoppingCart, */ User, Search, LogOut, ChevronDown, Navigation } fro
 // import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
 import useMutationApi from "@/hooks/useMutationApi";
+import useFetchApi from "@/hooks/useFetchApi";
+import AddressBottomSheet from "@/components/cart/AddressBottomSheet";
+import { SavedAddress } from "@/components/checkout/AddressForm";
 
 const NAV = [
   { label: "Home", href: "/" },
@@ -29,7 +32,19 @@ export default function Header() {
   // const { cartCount } = useCart();
   const { user, loading } = useAuth();
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [addressSheetOpen, setAddressSheetOpen] = useState(false);
+  const [selectedAddress, setSelectedAddress] = useState<SavedAddress | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
+
+  const { data: addresses } = useFetchApi<SavedAddress[]>({
+    endpoint: "v1/addresses",
+  });
+
+  useEffect(() => {
+    if (!addresses?.length || selectedAddress) return;
+    const def = addresses.find((a) => a.isDefault) ?? addresses[0];
+    setSelectedAddress(def);
+  }, [addresses]);
 
   const { mutateAsync: logout, isPending: isLoggingOut } = useMutationApi({
     endpoint: "v1/auth/logout",
@@ -76,13 +91,18 @@ export default function Header() {
         </div>
 
         {/* Row 2: Delivery location */}
-        <div className="flex items-center justify-center gap-1.5">
+        <button
+          onClick={() => setAddressSheetOpen(true)}
+          className="flex items-center justify-center gap-1.5"
+        >
           <Navigation className="w-3.5 h-3.5 text-accent fill-[#1A4F9C]" />
           <span className="text-[13px] font-semibold text-[#111827]">
-            Deliver to : Sector 62, Noida, UP
+            {selectedAddress
+              ? `${selectedAddress.city}, ${selectedAddress.state}`
+              : "Select Delivery Address"}
           </span>
           <ChevronDown className="w-3.5 h-3.5 text-[#111827]" />
-        </div>
+        </button>
 
         {/* Row 3: Search + Cart */}
         <div className="flex items-center gap-2">
@@ -215,6 +235,12 @@ export default function Header() {
         </div>
       </div>
 
+      <AddressBottomSheet
+        isOpen={addressSheetOpen}
+        onClose={() => setAddressSheetOpen(false)}
+        onSelect={(addr) => setSelectedAddress(addr)}
+        selectedId={selectedAddress?.id}
+      />
     </header>
   );
 }

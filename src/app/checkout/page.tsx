@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { ChevronLeft, Loader2, Star, BadgePercent } from "lucide-react";
 import { useCart } from "@/context/CartContext";
@@ -8,14 +8,28 @@ import { useAuth } from "@/context/AuthContext";
 import { formatINR } from "@/data/products";
 import { usePlaceOrder } from "@/hooks/useCheckoutInitiate";
 import { usePaymentInitiate } from "@/hooks/usePaymentInitiate";
-
-const BOOKING_AMOUNT = 50000;
+import AddressBottomSheet from "@/components/cart/AddressBottomSheet";
+import { SavedAddress } from "@/components/checkout/AddressForm";
+import useFetchApi from "@/hooks/useFetchApi";
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { items, serverItems, subtotal, cartCount, cartLoading } = useCart();
+  const { items, serverItems, summary, cartCount, cartLoading } = useCart();
   const { user } = useAuth();
   const [isProcessing, setIsProcessing] = useState(false);
+  const [addressSheetOpen, setAddressSheetOpen] = useState(false);
+  const [selectedAddress, setSelectedAddress] = useState<SavedAddress | null>(null);
+
+  const { data: addresses } = useFetchApi<SavedAddress[]>({
+    endpoint: "v1/addresses",
+    cacheEnabled: false,
+  });
+
+  useEffect(() => {
+    if (!addresses?.length || selectedAddress) return;
+    const def = addresses.find((a) => a.isDefault) ?? addresses[0];
+    setSelectedAddress(def);
+  }, [addresses]);
 
   const placeOrder = usePlaceOrder();
   const paymentInitiate = usePaymentInitiate();
@@ -23,7 +37,7 @@ export default function CheckoutPage() {
   const handlePlaceOrder = async () => {
     setIsProcessing(true);
     try {
-      const order = await placeOrder.mutateAsync({ addressId: "09c8d6e5-bd42-4124-b369-d8869bf43538", paymentMethod: "upi" });
+      const order = await placeOrder.mutateAsync({ addressId: selectedAddress?.id ?? "09c8d6e5-bd42-4124-b369-d8869bf43538", paymentMethod: "upi" });
       const payment = await paymentInitiate.mutateAsync({
         orderId: order.orderId,
         customerName: "vinay bachani",
@@ -37,8 +51,7 @@ export default function CheckoutPage() {
     }
   };
 
-  const offerDiscount = Math.round(subtotal * 0.12);
-  const netPayable = subtotal - offerDiscount;
+  const { subtotal, gstAmount, discountAmount, totalAmount, advanceAmount } = summary;
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
@@ -58,6 +71,33 @@ export default function CheckoutPage() {
       ) : (
         <>
           <div className="flex-1 pb-28 overflow-y-auto">
+
+            {/* ── Deliver To ── */}
+            <div className="px-4 py-4">
+              <p className="text-[15px] font-bold text-[#111827] mb-3">
+                Deliver To{selectedAddress ? ` : ${selectedAddress.fullName}` : ""}
+              </p>
+              <div className="flex items-start justify-between gap-4">
+                <p className="text-[14px] text-[#374151] leading-snug">
+                  {selectedAddress ? (
+                    <>
+                      {selectedAddress.addressLine1}
+                      {selectedAddress.addressLine2 ? `, ${selectedAddress.addressLine2}` : ""}<br />
+                      {selectedAddress.city}, {selectedAddress.state} — {selectedAddress.pincode}
+                    </>
+                  ) : (
+                    <span className="text-[#9CA3AF]">No address selected</span>
+                  )}
+                </p>
+                <button
+                  onClick={() => setAddressSheetOpen(true)}
+                  className="text-[14px] font-semibold text-accent shrink-0"
+                >
+                  Change
+                </button>
+              </div>
+            </div>
+            <div className="h-px bg-[#E5E7EB] mx-4" />
 
             {/* ── Items ── */}
             <div className="px-4 py-4">
@@ -128,13 +168,16 @@ export default function CheckoutPage() {
             <div className="px-4 py-4 flex flex-col gap-4">
               <p className="text-[15px] font-bold text-[#111827]">Price Detail ({cartCount} Items)</p>
 
-              <PriceRow label="Total MRP" amount={formatINR(subtotal)} />
-              <PriceRow
-                label="Offer Discount"
-                amount={`-${formatINR(offerDiscount)}`}
-                amountClass="text-[#DC2626]"
-              />
-              <PriceRow label="Net Payable Amount" amount={formatINR(netPayable)} />
+              <PriceRow label="Subtotal (excl. GST)" amount={formatINR(subtotal)} />
+              <PriceRow label="GST" amount={formatINR(gstAmount)} />
+              {discountAmount > 0 && (
+                <PriceRow
+                  label="Discount"
+                  amount={`-${formatINR(discountAmount)}`}
+                  amountClass="text-[#DC2626]"
+                />
+              )}
+              <PriceRow label="Net Payable Amount" amount={formatINR(totalAmount)} />
 
               {/* Booking card */}
               <div className="flex items-center gap-3 border border-[#E5E7EB] rounded-2xl p-4 mt-1">
@@ -144,7 +187,7 @@ export default function CheckoutPage() {
                 <div>
                   <p className="text-[14px] font-bold text-[#111827]">
                     Book this at just{" "}
-                    <span className="text-accent">{formatINR(BOOKING_AMOUNT)}</span>
+                    <span className="text-accent">{formatINR(advanceAmount)}</span>
                   </p>
                   <p className="text-[12px] text-[#6B7280] mt-0.5">Pay remaining amount after order confirmation</p>
                 </div>
@@ -165,12 +208,19 @@ export default function CheckoutPage() {
                   Processing...
                 </>
               ) : (
-                `Place Order - ${formatINR(BOOKING_AMOUNT)}`
+                `Place Order - ${formatINR(advanceAmount)}`
               )}
             </button>
           </div>
         </>
       )}
+
+      <AddressBottomSheet
+        isOpen={addressSheetOpen}
+        onClose={() => setAddressSheetOpen(false)}
+        onSelect={(addr) => setSelectedAddress(addr)}
+        selectedId={selectedAddress?.id}
+      />
     </div>
   );
 }

@@ -88,7 +88,7 @@ export default function SignupForm() {
       </p>
 
       {/* Demo mode banner */}
-      <div className="border border-yellow-300 bg-yellow-50 rounded-xl p-4 mb-7">
+      {/* <div className="border border-yellow-300 bg-yellow-50 rounded-xl p-4 mb-7">
         <div className="flex items-center gap-1.5 mb-1">
           <Zap className="w-3.5 h-3.5 text-yellow-500 fill-yellow-500" />
           <span className="text-[11px] font-bold text-yellow-700 tracking-widest uppercase">
@@ -99,7 +99,7 @@ export default function SignupForm() {
           Fill in valid details and tap{" "}
           <span className="font-semibold">Sign Up</span>.
         </p>
-      </div>
+      </div> */}
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
         {/* Work Email */}
@@ -205,7 +205,7 @@ export default function SignupForm() {
         <button
           type="submit"
           disabled={!isValid || isPending}
-          className="w-full bg-[#1e3a5f] hover:bg-[#162f4e] active:bg-[#112540] disabled:opacity-50 text-white font-semibold py-4 rounded-xl text-base transition-colors mt-1"
+          className="w-full bg-accent hover:bg-[#7a3232] active:bg-[#6b2a2a] disabled:opacity-50 text-white font-semibold py-4 rounded-xl text-base transition-colors mt-1"
         >
           {isPending ? "Signing Up..." : "Sign Up"}
         </button>

@@ -7,14 +7,22 @@ import { CartProvider } from "@/context/CartContext";
 import { ToastProvider } from "@/context/ToastContext";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
 import BottomTabBar from "@/components/layout/BottomTabBar";
+import { useBackButton } from "@/hooks/useBackButton";
 
 const queryClient = new QueryClient();
 
-const SHOW_TAB_ROUTES = ["/", "/explore"];
+const ROOT_ROUTES = ["/", "/explore"];
+const SHOW_TAB_ROUTES = ROOT_ROUTES;
 
 function useShowBottomTab() {
   const pathname = usePathname();
   return SHOW_TAB_ROUTES.includes(pathname);
+}
+
+function BackButtonHandler() {
+  const pathname = usePathname();
+  useBackButton(ROOT_ROUTES.includes(pathname));
+  return null;
 }
 
 function AuthGuard({ children }: { children: ReactNode }) {
@@ -50,6 +58,7 @@ export default function Providers({ children }: { children: ReactNode }) {
       <AuthProvider>
         <CartProvider>
           <ToastProvider>
+            <BackButtonHandler />
             <PageWrapper>
               <AuthGuard>{children}</AuthGuard>
             </PageWrapper>

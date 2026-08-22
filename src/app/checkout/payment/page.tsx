@@ -30,7 +30,8 @@ export default function CheckoutPaymentPage() {
     setAddressId(localStorage.getItem("checkoutAddressId") ?? "");
   }, []);
 
-  const { items, serverItems, subtotal, gst, total, refetchCart } = useCart();
+  const { items, serverItems, summary, refetchCart } = useCart();
+  const { subtotal, gstAmount: gst, totalAmount: total } = summary;
 
   useEffect(() => {
     refetchCart();

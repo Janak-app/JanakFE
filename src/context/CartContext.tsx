@@ -3,7 +3,7 @@
 import { createContext, useContext, useState, useMemo, useRef, useEffect, ReactNode } from "react";
 import useMutationApi from "@/hooks/useMutationApi";
 import useFetchApi from "@/hooks/useFetchApi";
-import { ApiCart, ApiCartItem } from "@/types/api";
+import { ApiCart, ApiCartItem, ApiCartSummary } from "@/types/api";
 
 export type CartItem = {
   productId: string;
@@ -16,6 +16,16 @@ type UpdateItemPayload = { dynamicEndpointSuffix: string; quantity: number };
 type UpdateItemResponse = { id: string; productId: string; quantity: number };
 type DeleteItemPayload = { dynamicEndpointSuffix: string };
 
+const DEFAULT_SUMMARY: ApiCartSummary = {
+  subtotal: 0,
+  gstAmount: 0,
+  discountAmount: 0,
+  shippingAmount: 0,
+  totalAmount: 0,
+  advanceAmount: 0,
+  balanceAmount: 0,
+};
+
 type CartContextType = {
   items: CartItem[];
   serverItems: ApiCartItem[];
@@ -25,9 +35,7 @@ type CartContextType = {
   clearCart: () => void;
   refetchCart: () => void;
   cartCount: number;
-  subtotal: number;
-  gst: number;
-  total: number;
+  summary: ApiCartSummary;
   cartLoading: boolean;
 };
 
@@ -151,21 +159,13 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setItems([]);
   };
 
-  const { cartCount, subtotal, gst, total } = useMemo(() => {
-    let count = 0;
-    let sub = 0;
-    items.forEach((it) => {
-      const serverItem = serverItems.find((s) => s.product.id === it.productId);
-      count += it.quantity;
-      if (serverItem?.product?.price) sub += parseFloat(serverItem.product.price) * it.quantity;
-    });
-    const gstVal = sub * 0.18;
-    return { cartCount: count, subtotal: sub, gst: gstVal, total: sub + gstVal };
-  }, [items, serverItems]);
+  const cartCount = useMemo(() => items.reduce((acc, it) => acc + it.quantity, 0), [items]);
+
+  const summary = cartData?.summary ?? DEFAULT_SUMMARY;
 
   return (
     <CartContext.Provider
-      value={{ items, serverItems, addItem, removeItem, updateQty, clearCart, refetchCart, cartCount, subtotal, gst, total, cartLoading }}
+      value={{ items, serverItems, addItem, removeItem, updateQty, clearCart, refetchCart, cartCount, summary, cartLoading }}
     >
       {children}
     </CartContext.Provider>

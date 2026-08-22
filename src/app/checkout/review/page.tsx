@@ -14,7 +14,8 @@ const STEPS = ["Address", "Payment", "Review"];
 
 export default function CheckoutReviewPage() {
   const router = useRouter();
-  const { items, subtotal, gst, total } = useCart();
+  const { items, summary } = useCart();
+  const { subtotal, gstAmount: gst, totalAmount: total } = summary;
   const [agree, setAgree] = useState(true);
 
   return (

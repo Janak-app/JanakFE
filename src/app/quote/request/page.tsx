@@ -6,9 +6,11 @@ import { ChevronLeft } from "lucide-react";
 import { useToast } from "@/context/ToastContext";
 import { useAuth } from "@/context/AuthContext";
 import { formatINR } from "@/data/products";
+import type { Product } from "@/data/products";
 import useProductDetail from "@/hooks/useProductDetail";
+import AddProductBottomSheet from "@/components/quote/AddProductBottomSheet";
 
-interface QuoteItem {
+export interface QuoteItem {
   productId: string;
   name: string;
   category: string;
@@ -60,9 +62,33 @@ function QuoteRequestForm() {
 
   const totalMRP = items.reduce((sum, it) => sum + it.price * it.qty, 0);
 
+  const [isAddProductOpen, setIsAddProductOpen] = useState(false);
+
   const updateQty = (productId: string, qty: number) => {
     if (qty < 1) return;
     setItems((prev) => prev.map((it) => it.productId === productId ? { ...it, qty } : it));
+  };
+
+  const handleAddProduct = (product: Product) => {
+    setItems((prev) => {
+      const existing = prev.find((it) => it.productId === product.id);
+      if (existing) {
+        return prev.map((it) =>
+          it.productId === product.id ? { ...it, qty: it.qty + 1 } : it
+        );
+      }
+      return [
+        ...prev,
+        {
+          productId: product.id,
+          name: product.name,
+          category: product.category,
+          image: product.images[0] ?? "",
+          price: product.price ?? 0,
+          qty: 1,
+        },
+      ];
+    });
   };
 
   const handleSubmit = () => {
@@ -117,7 +143,7 @@ function QuoteRequestForm() {
         <div className="flex items-center justify-between mb-3">
           <p className="text-[15px] font-bold text-[#111827]">Item for Quotation</p>
           <button
-            onClick={() => router.push("/explore")}
+            onClick={() => setIsAddProductOpen(true)}
             className="text-[13px] font-semibold text-accent"
           >
             Add More Products
@@ -195,6 +221,14 @@ function QuoteRequestForm() {
           className="w-full bg-white border border-[#E5E7EB] rounded-xl px-4 py-3 text-[14px] text-[#111827] placeholder:text-[#9CA3AF] outline-none focus:border-accent resize-none"
         />
       </div>
+
+      <AddProductBottomSheet
+        isOpen={isAddProductOpen}
+        onClose={() => setIsAddProductOpen(false)}
+        items={items}
+        onAdd={handleAddProduct}
+        onUpdateQty={updateQty}
+      />
 
       {/* Submit */}
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-[#E5E7EB] px-4 py-3 pb-6 z-20">

@@ -23,7 +23,8 @@ const STOCK_MAP: Record<ApiProduct["stockStatus"], Product["stock"]> = {
 };
 
 export function mapApiProduct(p: ApiProduct): Product {
-  const price = p.price ? parseFloat(p.price) : null;
+  const priceNum = parseFloat(p.price);
+  const price = Number.isFinite(priceNum) && priceNum > 0 ? priceNum : null;
   const sortedImages = [...(p.images ?? [])].sort((a, b) => a.sortOrder - b.sortOrder);
 
   return {

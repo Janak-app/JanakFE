@@ -43,7 +43,9 @@ export default function ServiceBookPage() {
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
-      <Header />
+      <div className="hidden md:block">
+        <Header />
+      </div>
 
       <div className="bg-white px-4 pt-5 pb-3 border-b border-[#E5E7EB] max-w-3xl mx-auto w-full">
         <h1 className="text-2xl font-bold text-[#111827] tracking-tight">Book Service</h1>

@@ -16,7 +16,9 @@ export default function ServiceDetailClient() {
   if (!s) {
     return (
       <div className="min-h-screen bg-white flex flex-col">
-        <Header />
+        <div className="hidden md:block">
+          <Header />
+        </div>
         <div className="flex-1 flex items-center justify-center">
           <p className="text-sm text-[#6B7280]">Service request not found.</p>
         </div>

@@ -65,7 +65,9 @@ export default function ChatPage() {
 
   return (
     <div className="h-screen flex flex-col bg-white">
-      <Header />
+      <div className="hidden md:block">
+        <Header />
+      </div>
 
       {/* Chat box — flush below header, centered, fixed height fills remaining space */}
       <div className="flex-1 flex flex-col max-w-4xl mx-auto w-full border-x border-b border-[#E5E7EB] overflow-hidden">

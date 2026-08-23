@@ -47,7 +47,7 @@ export default function QuoteListPage() {
         <div className="bg-white border border-t-0 border-[#E5E7EB] rounded-b-2xl overflow-hidden">
           {/* Page title bar */}
           <div className="border-b border-[#E5E7EB]">
-            <div className="relative flex items-center justify-center h-14 px-4">
+            <div className="relative flex items-center justify-center min-h-[56px] px-4" style={{ paddingTop: "calc(var(--sat) + 0.5rem)", paddingBottom: "0.5rem" }}>
               <button
                 onClick={() => router.back()}
                 className="absolute left-4 w-8 h-8 flex items-center justify-center rounded-full hover:bg-[#F5F5F7] transition-colors"

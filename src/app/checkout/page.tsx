@@ -57,7 +57,7 @@ export default function CheckoutPage() {
     <div className="min-h-screen bg-white flex flex-col">
 
       {/* ── Top bar ── */}
-      <div className="flex items-center gap-3 px-4 pt-5 pb-3">
+      <div className="flex items-center gap-3 px-4 pb-3" style={{ paddingTop: "calc(var(--sat) + 1.25rem)" }}>
         <button onClick={() => router.back()} className="w-9 h-9 flex items-center justify-center">
           <ChevronLeft className="w-5 h-5 text-[#111827]" />
         </button>

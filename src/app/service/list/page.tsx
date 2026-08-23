@@ -14,7 +14,7 @@ export default function ServiceListPage() {
       </div>
 
       <div className="bg-white border-b border-[#E5E7EB]">
-        <div className="max-w-3xl mx-auto px-4 pt-5 pb-3 flex items-center justify-between">
+        <div className="max-w-3xl mx-auto px-4 pb-3 flex items-center justify-between" style={{ paddingTop: "calc(var(--sat) + 1.25rem)" }}>
           <div>
             <h1 className="text-2xl font-bold text-[#111827] tracking-tight">Service Requests</h1>
             <p className="text-xs text-[#6B7280] mt-0.5">{serviceRequests.length} active</p>

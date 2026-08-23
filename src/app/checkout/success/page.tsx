@@ -97,7 +97,7 @@ function OrderConfirmationInner() {
     <div className="min-h-screen bg-white pb-10">
 
       {/* ── Logo ── */}
-      <div className="px-4 pt-5 pb-4">
+      <div className="px-4 pb-4" style={{ paddingTop: "calc(var(--sat) + 1.25rem)" }}>
         <Image src="/logo/janak-logo.svg" alt="Janak" width={110} height={38} priority />
       </div>
 

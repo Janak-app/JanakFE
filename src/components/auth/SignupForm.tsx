@@ -1,12 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { Mail, Lock, Eye, EyeOff, Zap } from "lucide-react";
+import { Mail, Lock, Eye, EyeOff } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
-import JanakLogo from "./JanakLogo";
 import useMutationApi from "@/hooks/useMutationApi";
 
 const signupSchema = z
@@ -77,12 +77,14 @@ export default function SignupForm() {
 
   return (
     <div className="w-full max-w-sm mx-auto">
-      <JanakLogo />
+      <div className="flex justify-center">
+        <Image src="/logo/janak-logo.svg" alt="Janak Logo" width={180} height={70} priority />
+      </div>
 
-      <h1 className="text-3xl font-bold text-gray-900 mt-8 mb-2">
+      <h1 className="text-3xl font-bold text-gray-900 mt-8 mb-2 text-center">
         Create Account
       </h1>
-      <p className="text-sm text-gray-500 mb-6">
+      <p className="text-sm text-gray-500 mb-6 text-center">
         Join the trade network to access exclusive pricing, orders, and your
         dashboard.
       </p>

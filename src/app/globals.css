@@ -6,6 +6,7 @@
 :root {
   --background: #ffffff;
   --foreground: #111827;
+  --sat: env(safe-area-inset-top, 0px);
 }
 
 @theme inline {

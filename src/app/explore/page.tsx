@@ -68,7 +68,7 @@ function ExploreContent() {
       </div>
 
       {/* ── Mobile top section ── */}
-      <div className="md:hidden px-4 pt-5 pb-3 flex flex-col gap-3">
+      <div className="md:hidden px-4 pb-3 flex flex-col gap-3" style={{ paddingTop: "calc(var(--sat) + 1.25rem)" }}>
         {/* Title */}
         <h1 className="text-[22px] font-bold text-[#111827]">Explore</h1>
 

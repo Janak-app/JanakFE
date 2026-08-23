@@ -45,7 +45,7 @@ export default function ComparePage() {
 
       {/* Title bar */}
       <div className="bg-white border-b border-[#E5E7EB]">
-        <div className="max-w-3xl mx-auto px-4 pt-5 pb-3 flex items-center gap-3">
+        <div className="max-w-3xl mx-auto px-4 pb-3 flex items-center gap-3" style={{ paddingTop: "calc(var(--sat) + 1.25rem)" }}>
           <button
             onClick={() => router.back()}
             className="w-8 h-8 flex items-center justify-center"

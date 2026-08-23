@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Smartphone, Building2, CreditCard, ShieldCheck, AtSign, CheckCircle } from "lucide-react";
+import { Capacitor } from "@capacitor/core";
 import Header from "@/components/layout/Header";
 import Button from "@/components/ui/Button";
 import StepIndicator from "@/components/ui/StepIndicator";
@@ -45,6 +46,11 @@ export default function CheckoutPaymentPage() {
 
   const handlePay = () => {
     if (!user) return;
+    const isNative = Capacitor.isNativePlatform();
+    const returnUrl = isNative
+      ? "janakapp://payment-result"
+      : `${window.location.origin}/payment-result`;
+
     placeOrderMutation.mutate(
       { addressId, paymentMethod: method },
       {
@@ -55,12 +61,17 @@ export default function CheckoutPaymentPage() {
               customerName: "Vinay Bachani",
               customerEmail: user.email,
               customerMobile: "919999999999", // TODO: replace with real mobile once available
-              returnUrl: `${window.location.origin}/payment-result`,
+              returnUrl,
             },
             {
-              onSuccess: (payment) => {
+              onSuccess: async (payment) => {
                 localStorage.setItem("merchantTxnNo", payment.merchantTxnNo);
-                window.location.href = payment.paymentUrl;
+                if (isNative) {
+                  const { Browser } = await import("@capacitor/browser");
+                  await Browser.open({ url: payment.paymentUrl });
+                } else {
+                  window.location.href = payment.paymentUrl;
+                }
               },
             }
           );

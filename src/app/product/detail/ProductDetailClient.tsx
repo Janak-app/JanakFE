@@ -68,7 +68,7 @@ export default function ProductDetailClient() {
   return (
     <div className="min-h-screen bg-white flex flex-col">
       {/* Top bar */}
-      <div className="sticky top-0 z-20 bg-white border-b border-[#E5E7EB] flex items-center px-2 py-2 gap-1">
+      <div className="sticky top-0 z-20 bg-white border-b border-[#E5E7EB] flex items-center px-2 pb-2 gap-1" style={{ paddingTop: "calc(var(--sat) + 0.5rem)" }}>
         <button
           onClick={() => router.back()}
           className="w-9 h-9 rounded-full bg-[#F5F5F7] flex items-center justify-center"

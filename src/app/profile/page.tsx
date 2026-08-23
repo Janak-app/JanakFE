@@ -44,7 +44,7 @@ export default function ProfilePage() {
 
       <div className="max-w-3xl mx-auto">
         {/* Header */}
-        <div className="bg-white px-4 pt-5 pb-3 border-b border-[#E5E7EB] flex items-center gap-3">
+        <div className="bg-white px-4 pb-3 border-b border-[#E5E7EB] flex items-center gap-3" style={{ paddingTop: "calc(var(--sat) + 1.25rem)" }}>
           <button
             onClick={() => router.back()}
             className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-[#F5F5F7] transition-colors"

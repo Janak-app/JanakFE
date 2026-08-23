@@ -284,7 +284,7 @@ export default function QuoteRequestPage() {
   return (
     <div className="min-h-screen bg-white flex flex-col">
       {/* Top bar */}
-      <div className="flex items-center gap-3 px-4 pt-5 pb-3 border-b border-[#E5E7EB]">
+      <div className="flex items-center gap-3 px-4 pb-3 border-b border-[#E5E7EB]" style={{ paddingTop: "calc(var(--sat) + 1.25rem)" }}>
         <button
           onClick={() => router.back()}
           className="w-9 h-9 flex items-center justify-center"

@@ -70,7 +70,7 @@ export default function OrderDetailClient() {
     <div className="min-h-screen bg-white flex flex-col">
 
       {/* ── Top bar ── */}
-      <div className="flex items-center px-4 pt-4 pb-2 gap-2">
+      <div className="flex items-center px-4 pb-2 gap-2" style={{ paddingTop: "calc(var(--sat) + 1rem)" }}>
         <button
           onClick={() => router.back()}
           className="w-9 h-9 flex items-center justify-center"

@@ -8,6 +8,7 @@ import { ToastProvider } from "@/context/ToastContext";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
 import BottomTabBar from "@/components/layout/BottomTabBar";
 import { useBackButton } from "@/hooks/useBackButton";
+import { useDeepLink } from "@/hooks/useDeepLink";
 
 const queryClient = new QueryClient();
 
@@ -22,6 +23,11 @@ function useShowBottomTab() {
 function BackButtonHandler() {
   const pathname = usePathname();
   useBackButton(ROOT_ROUTES.includes(pathname));
+  return null;
+}
+
+function DeepLinkHandler() {
+  useDeepLink();
   return null;
 }
 
@@ -59,6 +65,7 @@ export default function Providers({ children }: { children: ReactNode }) {
         <CartProvider>
           <ToastProvider>
             <BackButtonHandler />
+            <DeepLinkHandler />
             <PageWrapper>
               <AuthGuard>{children}</AuthGuard>
             </PageWrapper>

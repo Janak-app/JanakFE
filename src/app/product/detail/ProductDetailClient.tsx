@@ -5,7 +5,7 @@ import Image from "next/image";
 import { useSearchParams, useRouter } from "next/navigation";
 import {
   ChevronLeft, ChevronRight, GitCompare, Heart, Share2, Phone,
-  Star, CheckCircle, ShoppingCart, ClipboardList,
+  Star, CheckCircle, ShoppingCart, ClipboardList, FileText, Download,
 } from "lucide-react";
 import StatusBadge from "@/components/ui/StatusBadge";
 import Button from "@/components/ui/Button";
@@ -14,7 +14,7 @@ import useProductDetail from "@/hooks/useProductDetail";
 import { useCart } from "@/context/CartContext";
 import { useToast } from "@/context/ToastContext";
 
-const TABS = ["Overview", "Specifications", "Reviews"] as const;
+const TABS = ["Overview", "Key Specifications", "Reviews", "Downloads"] as const;
 type TabKey = typeof TABS[number];
 
 export default function ProductDetailClient() {
@@ -223,7 +223,7 @@ export default function ProductDetailClient() {
             </div>
           )}
 
-          {tab === "Specifications" && (
+          {tab === "Key Specifications" && (
             <div className="border border-[#E5E7EB] rounded-xl overflow-hidden">
               {product.specs.map((s, i) => (
                 <div
@@ -264,6 +264,41 @@ export default function ProductDetailClient() {
                   <p className="text-[13px] text-[#374151] mt-2 leading-snug">{r.text}</p>
                 </div>
               ))}
+            </div>
+          )}
+
+          {tab === "Downloads" && (
+            <div className="flex flex-col gap-3">
+              {product.documents && product.documents.length > 0 ? (
+                product.documents.map((doc, i) => (
+                  <a
+                    key={i}
+                    href={doc.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-3 p-4 border border-[#E5E7EB] rounded-xl"
+                  >
+                    <div className="w-10 h-10 rounded-xl bg-[#EFF6FF] flex items-center justify-center shrink-0">
+                      <FileText className="w-5 h-5 text-[#1A4F9C]" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-[#111827] truncate">{doc.name}</p>
+                      <p className="text-[11px] text-[#6B7280] mt-0.5">PDF Document</p>
+                    </div>
+                    <Download className="w-4 h-4 text-[#6B7280] shrink-0" />
+                  </a>
+                ))
+              ) : (
+                <div className="flex flex-col items-center justify-center py-12 gap-3">
+                  <div className="w-14 h-14 rounded-2xl bg-[#F5F5F7] flex items-center justify-center">
+                    <FileText className="w-7 h-7 text-[#9CA3AF]" />
+                  </div>
+                  <p className="text-sm font-semibold text-[#111827]">No downloads available</p>
+                  <p className="text-xs text-[#6B7280] text-center">
+                    Documents and brochures for this product will appear here.
+                  </p>
+                </div>
+              )}
             </div>
           )}
 

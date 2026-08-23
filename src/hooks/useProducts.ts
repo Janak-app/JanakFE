@@ -44,6 +44,7 @@ export function mapApiProduct(p: ApiProduct): Product {
       .sort((a, b) => a.sortOrder - b.sortOrder)
       .map(({ key, value }) => ({ label: key, value })),
     reviews: [],
+    documents: [...(p.documents ?? [])].sort((a, b) => a.sortOrder - b.sortOrder),
   };
 }
 

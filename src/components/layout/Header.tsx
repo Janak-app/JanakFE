@@ -72,7 +72,10 @@ export default function Header() {
   };
 
   return (
-    <header className="bg-white border-b border-[#E5E7EB] sticky top-0 z-50">
+    <header
+      className="bg-white border-b border-[#E5E7EB] sticky top-0 z-50"
+      style={{ paddingTop: "env(safe-area-inset-top)" }}
+    >
 
       {/* ── Mobile header (3-row layout) ── */}
       <div className="md:hidden px-4 pt-3 pb-3 flex flex-col gap-2">

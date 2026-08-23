@@ -13,6 +13,7 @@ export type Product = {
   highlights: string[];
   specs: { label: string; value: string }[];
   reviews: { name: string; rating: number; date: string; text: string }[];
+  documents?: { id: string; url: string; name: string; sortOrder: number }[];
 };
 
 const LEICA_IMGS = [

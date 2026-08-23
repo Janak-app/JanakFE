@@ -93,10 +93,12 @@ export default function LoginForm() {
 
   return (
     <div className="w-full max-w-sm mx-auto">
-      <Image src="/logo/janak-logo.svg" alt="Janak Logo" width={180} height={70} priority />
+      <div className="flex justify-center">
+        <Image src="/logo/janak-logo.svg" alt="Janak Logo" width={180} height={70} priority />
+      </div>
 
-      <h1 className="text-3xl font-bold text-gray-900 mt-8 mb-2">Welcome Back</h1>
-      <p className="text-sm text-gray-500 mb-6">
+      <h1 className="text-3xl font-bold text-gray-900 mt-8 mb-2 text-center">Welcome Back</h1>
+      <p className="text-sm text-gray-500 mb-6 text-center">
         Sign in to access your dashboard, orders, and exclusive trade pricing.
       </p>
 

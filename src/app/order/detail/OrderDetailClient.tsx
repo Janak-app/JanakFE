@@ -3,16 +3,23 @@
 import { useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import {
-  ChevronLeft, Share2, Heart, Star,
-  CheckCircle, FileText, BarChart2, Download,
-  ChevronRight, ClipboardList,
+  ChevronLeft,
+  MapPin,
+  CreditCard,
+  Package,
+  Truck,
+  CheckCircle2,
+  Clock,
 } from "lucide-react";
+import StatusBadge from "@/components/ui/StatusBadge";
 import InfoBanner from "@/components/ui/InfoBanner";
-import FeaturedCard from "@/components/products/FeaturedCard";
-import { orders } from "@/data/orders";
-import { products } from "@/data/products";
+import {
+  useOrder,
+  formatOrderAmount,
+  formatOrderDate,
+} from "@/hooks/useOrders";
 
-const TABS = ["Overview", "Specifications", "Downloads", "Reviews"] as const;
+const TABS = ["Summary", "Tracking", "Shipping", "Payment"] as const;
 type TabKey = typeof TABS[number];
 
 export default function OrderDetailClient() {
@@ -20,11 +27,28 @@ export default function OrderDetailClient() {
   const id = searchParams.get("id") ?? "";
   const router = useRouter();
 
-  const order = orders.find((o) => o.id === id);
-
+  const { order, loading } = useOrder(id);
   const [imgIdx, setImgIdx] = useState(0);
-  const [wishlisted, setWishlisted] = useState(false);
-  const [tab, setTab] = useState<TabKey>("Overview");
+  const [tab, setTab] = useState<TabKey>("Summary");
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-white flex flex-col">
+        <div className="flex items-center px-4 pt-4 pb-2 gap-2">
+          <button onClick={() => router.back()} className="w-9 h-9 flex items-center justify-center">
+            <ChevronLeft className="w-5 h-5 text-[#111827]" />
+          </button>
+          <div className="h-5 w-32 bg-[#E5E7EB] rounded animate-pulse" />
+        </div>
+        <div className="mx-4 rounded-2xl bg-[#E5E7EB] h-64 animate-pulse" />
+        <div className="px-4 pt-4 flex flex-col gap-3">
+          <div className="h-4 w-24 bg-[#E5E7EB] rounded animate-pulse" />
+          <div className="h-6 w-3/4 bg-[#E5E7EB] rounded animate-pulse" />
+          <div className="h-4 w-1/2 bg-[#E5E7EB] rounded animate-pulse" />
+        </div>
+      </div>
+    );
+  }
 
   if (!order) {
     return (
@@ -34,8 +58,13 @@ export default function OrderDetailClient() {
     );
   }
 
-  const images = [order.productImage];
-  const bookingAmount = "₹60,000";
+  const firstItem = order.items[0];
+  const images = firstItem?.product.images
+    .slice()
+    .sort((a, b) => a.sortOrder - b.sortOrder)
+    .map((img) => img.url) ?? [];
+
+  const totalQty = order.items.reduce((sum, item) => sum + item.quantity, 0);
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
@@ -48,74 +77,72 @@ export default function OrderDetailClient() {
         >
           <ChevronLeft className="w-5 h-5 text-[#111827]" />
         </button>
-        <p className="flex-1 text-[16px] font-bold text-[#111827]">Receiver</p>
-        <button className="w-9 h-9 flex items-center justify-center">
-          <Share2 className="w-5 h-5 text-[#111827]" />
-        </button>
-        <button
-          onClick={() => setWishlisted((v) => !v)}
-          className="w-9 h-9 flex items-center justify-center"
-        >
-          <Heart className={`w-5 h-5 ${wishlisted ? "fill-accent text-accent" : "text-[#111827]"}`} />
-        </button>
+        <p className="flex-1 text-[16px] font-bold text-[#111827]">{order.orderId}</p>
+        <StatusBadge status={order.status} />
       </div>
 
       {/* ── Image carousel ── */}
-      <div className="bg-[#F5F5F7] mx-4 rounded-2xl overflow-hidden">
-        <div className="h-64 flex items-center justify-center">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={images[imgIdx]}
-            alt={order.productName}
-            className="w-full h-full object-contain p-4"
-          />
-        </div>
-        {/* Dot indicators */}
-        <div className="flex justify-center gap-1.5 pb-3">
-          {images.map((_, i) => (
-            <button
-              key={i}
-              onClick={() => setImgIdx(i)}
-              className={`h-1.5 rounded-full transition-all ${
-                i === imgIdx ? "w-5 bg-[#9CA3AF]" : "w-1.5 bg-[#D1D5DB]"
-              }`}
+      {images.length > 0 && (
+        <div className="bg-[#F5F5F7] mx-4 rounded-2xl overflow-hidden">
+          <div className="h-64 flex items-center justify-center">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={images[imgIdx]}
+              alt={firstItem?.productName ?? "Product"}
+              className="w-full h-full object-contain p-4"
             />
-          ))}
+          </div>
+          {images.length > 1 && (
+            <div className="flex justify-center gap-1.5 pb-3">
+              {images.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setImgIdx(i)}
+                  className={`h-1.5 rounded-full transition-all ${
+                    i === imgIdx ? "w-5 bg-[#9CA3AF]" : "w-1.5 bg-[#D1D5DB]"
+                  }`}
+                />
+              ))}
+            </div>
+          )}
         </div>
-      </div>
+      )}
 
-      {/* ── Product info ── */}
-      <div className="px-4 pt-4 flex flex-col gap-3 pb-28">
+      {/* ── Order info ── */}
+      <div className="px-4 pt-4 flex flex-col gap-3 pb-10">
 
-        {/* Category pill */}
-        <span className="self-start text-[12px] font-semibold text-accent border border-accent px-3 py-0.5 rounded-full">
-          GNSS Antenna
-        </span>
-
-        {/* Product name */}
-        <h1 className="text-[22px] font-bold text-[#111827] leading-snug">
-          {order.productName}
+        {/* Product name + meta */}
+        <h1 className="text-[20px] font-bold text-[#111827] leading-snug">
+          {order.items.length === 1
+            ? firstItem?.productName
+            : `${firstItem?.productName} + ${order.items.length - 1} more`}
         </h1>
-
-        {/* Rating */}
-        <div className="flex items-center gap-1.5">
-          <span className="text-[14px] font-semibold text-[#111827]">4.4</span>
-          <Star className="w-4 h-4 fill-[#1A4F9C] text-accent" />
-          <span className="text-[13px] text-[#6B7280]">(400 Rating)</span>
+        <div className="flex items-center gap-3 flex-wrap">
+          <span className="text-[13px] text-[#6B7280]">
+            Placed on {formatOrderDate(order.createdAt)}
+          </span>
+          <span className="text-[13px] text-[#6B7280]">·</span>
+          <span className="text-[13px] text-[#6B7280]">Qty: {totalQty}</span>
         </div>
 
-        {/* Price row */}
-        <div className="flex items-center gap-2 flex-wrap">
-          <span className="text-[22px] font-bold text-[#111827]">{order.amountLabel}</span>
-          <span className="text-[14px] text-[#9CA3AF] line-through">₹10,99,999</span>
-          <span className="text-[13px] font-semibold text-[#16A34A]">40% Off</span>
-        </div>
+        {/* Total amount */}
+        <p className="text-[22px] font-bold text-[#111827]">
+          {formatOrderAmount(order.totalAmount)}
+        </p>
 
-        {/* Book now banner */}
-        <InfoBanner
-          title={`Book this at just ${bookingAmount}`}
-          subtitle="Pay remaining amount after order confirmation"
-        />
+        {/* Advance / balance banner */}
+        {order.advancePaid && !order.balancePaid && (
+          <InfoBanner
+            title={`Balance due: ${formatOrderAmount(order.balanceAmount)}`}
+            subtitle={`Advance of ${formatOrderAmount(order.advanceAmount)} paid`}
+          />
+        )}
+        {!order.advancePaid && (
+          <InfoBanner
+            title={`Advance payment pending: ${formatOrderAmount(order.advanceAmount)}`}
+            subtitle="Pay advance to confirm your order"
+          />
+        )}
 
         {/* ── Tabs ── */}
         <div className="flex border-b border-[#E5E7EB] mt-2 overflow-x-auto [&::-webkit-scrollbar]:hidden">
@@ -134,130 +161,197 @@ export default function OrderDetailClient() {
           ))}
         </div>
 
-        {/* Tab content */}
-        {tab === "Overview" && (
+        {/* ── Summary ── */}
+        {tab === "Summary" && (
           <div className="flex flex-col gap-4 pt-1">
-            <p className="text-[14px] text-[#374151] leading-relaxed">
-              &ldquo;Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
-              incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud
-              exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure
-              dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
-              Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt
-              mollit anim id est laborum.&rdquo;
-            </p>
-            <button className="w-full flex items-center gap-3 border border-[#E5E7EB] rounded-2xl p-4 text-left">
-              <div className="w-10 h-10 bg-[#EFF6FF] rounded-xl flex items-center justify-center shrink-0">
-                <ClipboardList className="w-5 h-5 text-accent" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-[15px] font-bold text-[#111827]">Need a different price?</p>
-                <p className="text-[12px] text-[#6B7280] mt-0.5">Request Quote Adjustment</p>
-              </div>
-              <ChevronRight className="w-5 h-5 text-[#9CA3AF] shrink-0" />
-            </button>
-          </div>
-        )}
-
-        {tab === "Specifications" && (
-          <div className="border border-[#E5E7EB] rounded-xl overflow-hidden mt-1">
-            {[
-              { label: "Frequency Bands", value: "L1/L2/L5" },
-              { label: "Connector", value: "TNC Female" },
-              { label: "Gain", value: "40 dB typical" },
-              { label: "Operating Temp", value: "-40°C to +85°C" },
-              { label: "Dimensions", value: "Ø 185 × 67 mm" },
-              { label: "Weight", value: "680 g" },
-            ].map((s, i, arr) => (
-              <div
-                key={s.label}
-                className={`flex items-center justify-between px-3.5 py-2.5 ${
-                  i < arr.length - 1 ? "border-b border-[#E5E7EB]" : ""
-                } ${i % 2 === 0 ? "bg-white" : "bg-[#F9FAFB]"}`}
-              >
-                <span className="text-[12px] text-[#6B7280]">{s.label}</span>
-                <span className="text-[12px] font-semibold text-[#111827]">{s.value}</span>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {tab === "Downloads" && (
-          <div className="flex flex-col gap-3 mt-1">
-            {[
-              { name: "Product Brochure", size: "2.4 MB", Icon: FileText },
-              { name: "Technical Datasheet", size: "1.1 MB", Icon: BarChart2 },
-            ].map(({ name, size, Icon }) => (
-              <div key={name} className="flex items-center gap-3 p-3.5 bg-white border border-[#E5E7EB] rounded-xl">
-                <div className="w-10 h-10 rounded-[10px] bg-[#FEE2E2] flex items-center justify-center shrink-0">
-                  <Icon className="w-5 h-5 text-[#DC2626]" />
+            {/* Items */}
+            {order.items.map((item) => {
+              const primary =
+                item.product.images.find((img) => img.isPrimary) ??
+                item.product.images[0];
+              return (
+                <div key={item.id} className="flex items-center gap-3 border border-[#E5E7EB] rounded-xl p-3">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={primary?.url}
+                    alt={item.productName}
+                    className="w-14 h-16 rounded-lg object-contain bg-[#F5F5F7] shrink-0"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[13px] font-semibold text-[#111827] line-clamp-2">{item.productName}</p>
+                    <p className="text-[12px] text-[#6B7280] mt-0.5">Model: {item.product.modelNumber}</p>
+                    <p className="text-[12px] text-[#6B7280]">Qty: {item.quantity}</p>
+                  </div>
+                  <p className="text-[14px] font-bold text-[#111827] shrink-0">
+                    {formatOrderAmount(item.totalPrice)}
+                  </p>
                 </div>
-                <div className="flex-1">
-                  <p className="text-[13px] font-semibold text-[#111827]">{name}</p>
-                  <p className="text-[11px] text-[#6B7280] mt-0.5">PDF · {size}</p>
-                </div>
-                <Download className="w-5 h-5 text-accent" />
-              </div>
-            ))}
-          </div>
-        )}
+              );
+            })}
 
-        {tab === "Reviews" && (
-          <div className="flex flex-col gap-3 mt-1">
-            {/* Summary row */}
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-1.5 bg-[#16A34A] text-white text-[13px] font-bold px-3 py-1.5 rounded-xl">
-                <span>4.5</span>
-                <Star className="w-3.5 h-3.5 fill-white text-white" />
+            {/* Price breakdown */}
+            <div className="border border-[#E5E7EB] rounded-xl overflow-hidden">
+              {[
+                { label: "Subtotal", value: formatOrderAmount(order.subtotal) },
+                { label: "GST", value: formatOrderAmount(order.gstAmount) },
+                { label: "Shipping", value: parseFloat(order.shippingAmount) === 0 ? "Free" : formatOrderAmount(order.shippingAmount) },
+              ].map((row, i) => (
+                <div
+                  key={row.label}
+                  className={`flex justify-between items-center px-4 py-3 ${i % 2 === 0 ? "bg-white" : "bg-[#F9FAFB]"} border-b border-[#E5E7EB]`}
+                >
+                  <span className="text-[13px] text-[#6B7280]">{row.label}</span>
+                  <span className="text-[13px] font-medium text-[#111827]">{row.value}</span>
+                </div>
+              ))}
+              <div className="flex justify-between items-center px-4 py-3 bg-white">
+                <span className="text-[14px] font-bold text-[#111827]">Total</span>
+                <span className="text-[14px] font-bold text-accent">{formatOrderAmount(order.totalAmount)}</span>
               </div>
-              <span className="text-[13px] text-[#374151] font-medium">68 Ratings | 6 Reviews</span>
             </div>
 
-            {/* Horizontal scroll cards */}
-            <div className="flex gap-3 overflow-x-auto pb-1 -mx-4 px-4 [&::-webkit-scrollbar]:hidden">
-              {[
-                { name: "Samantha Payne", rating: 1.0, date: "23 Nov 2021", text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit ut aliquam, purus sit amet luctus venenatis, lectus magna fringilla urna, porttitor rhoncus dolor purus non e..." },
-                { name: "Rajan Mehta", rating: 4.5, date: "10 Jun 2026", text: "Excellent antenna, very accurate phase centre. Works perfectly with our Leica GS18. Highly recommend for any RTK application." },
-                { name: "Sonal Patel", rating: 5.0, date: "22 May 2026", text: "Solid build, IP67 rating gives confidence in the field. Fast lock-on, stable signal. Worth every rupee." },
-              ].map((r) => (
-                <div key={r.name} className="shrink-0 w-64 border border-[#E5E7EB] rounded-2xl p-4 bg-white">
-                  <div className="flex items-start justify-between gap-2 mb-1">
-                    <p className="text-[13px] font-bold text-[#111827] leading-snug">{r.name}</p>
-                    <div className="flex items-center gap-1 bg-accent text-white text-[11px] font-bold px-2 py-0.5 rounded-lg shrink-0">
-                      <span>{r.rating.toFixed(1)}</span>
-                      <Star className="w-3 h-3 fill-white text-white" />
-                    </div>
+            {/* Advance / balance breakdown */}
+            <div className="border border-[#E5E7EB] rounded-xl overflow-hidden">
+              <div className={`flex justify-between items-center px-4 py-3 bg-white border-b border-[#E5E7EB]`}>
+                <span className="text-[13px] text-[#6B7280]">Advance (10%)</span>
+                <div className="flex items-center gap-2">
+                  <span className="text-[13px] font-medium text-[#111827]">{formatOrderAmount(order.advanceAmount)}</span>
+                  {order.advancePaid && <CheckCircle2 className="w-4 h-4 text-[#16A34A]" />}
+                </div>
+              </div>
+              <div className="flex justify-between items-center px-4 py-3 bg-[#F9FAFB]">
+                <span className="text-[13px] text-[#6B7280]">Balance</span>
+                <div className="flex items-center gap-2">
+                  <span className="text-[13px] font-medium text-[#111827]">{formatOrderAmount(order.balanceAmount)}</span>
+                  {order.balancePaid
+                    ? <CheckCircle2 className="w-4 h-4 text-[#16A34A]" />
+                    : <Clock className="w-4 h-4 text-[#D97706]" />}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ── Tracking ── */}
+        {tab === "Tracking" && (
+          <div className="flex flex-col gap-4 pt-1">
+            {/* Estimated delivery */}
+            <div className="flex items-start gap-3 bg-[#EFF6FF] rounded-xl p-4">
+              <Truck className="w-5 h-5 text-accent shrink-0 mt-0.5" />
+              <div>
+                <p className="text-[13px] font-semibold text-[#111827]">Estimated Delivery</p>
+                <p className="text-[12px] text-[#6B7280] mt-0.5">
+                  {formatOrderDate(order.estimatedDeliveryStart)} – {formatOrderDate(order.estimatedDeliveryEnd)}
+                </p>
+              </div>
+            </div>
+
+            {/* Courier info */}
+            {order.tracking.courierName && (
+              <div className="border border-[#E5E7EB] rounded-xl p-4 flex flex-col gap-1">
+                <p className="text-[12px] text-[#6B7280]">Courier</p>
+                <p className="text-[14px] font-semibold text-[#111827]">{order.tracking.courierName}</p>
+                {order.tracking.awbNumber && (
+                  <p className="text-[12px] text-[#6B7280]">AWB: {order.tracking.awbNumber}</p>
+                )}
+              </div>
+            )}
+
+            {/* Timeline */}
+            <div className="flex flex-col">
+              {order.tracking.events.map((event, i) => (
+                <div key={i} className="flex gap-3">
+                  <div className="flex flex-col items-center">
+                    <div className={`w-3 h-3 rounded-full mt-1 shrink-0 ${i === 0 ? "bg-accent" : "bg-[#D1D5DB]"}`} />
+                    {i < order.tracking.events.length - 1 && (
+                      <div className="w-px flex-1 bg-[#E5E7EB] my-1" />
+                    )}
                   </div>
-                  <p className="text-[11px] text-[#9CA3AF] mb-2">{r.date}</p>
-                  <p className="text-[12px] text-[#374151] leading-relaxed line-clamp-4">{r.text}</p>
+                  <div className="pb-5">
+                    <p className="text-[13px] font-semibold text-[#111827]">{event.status}</p>
+                    <p className="text-[12px] text-[#6B7280] mt-0.5">{event.message}</p>
+                    <p className="text-[11px] text-[#9CA3AF] mt-0.5">{formatOrderDate(event.timestamp)}</p>
+                  </div>
                 </div>
               ))}
             </div>
+
+            {!order.tracking.courierName && order.tracking.events.length === 0 && (
+              <p className="text-sm text-[#6B7280] text-center py-6">No tracking updates yet.</p>
+            )}
           </div>
         )}
 
-        {/* ── Always visible: More Product Like This ── */}
-        <div className="flex items-center gap-3 mt-4">
-          <hr className="flex-1 border-[#E5E7EB]" />
-          <span className="text-[11px] font-bold text-[#9CA3AF] tracking-widest uppercase whitespace-nowrap">
-            More Product Like This
-          </span>
-          <hr className="flex-1 border-[#E5E7EB]" />
-        </div>
-        <div className="grid grid-cols-2 gap-3">
-          {products.slice(0, 4).map((p) => (
-            <FeaturedCard key={p.id} product={p} />
-          ))}
-        </div>
-      </div>
+        {/* ── Shipping ── */}
+        {tab === "Shipping" && (
+          <div className="pt-1">
+            <div className="border border-[#E5E7EB] rounded-xl p-4 flex gap-3">
+              <MapPin className="w-5 h-5 text-accent shrink-0 mt-0.5" />
+              <div className="flex flex-col gap-0.5">
+                <p className="text-[14px] font-semibold text-[#111827]">{order.shippingAddress.fullName}</p>
+                <p className="text-[13px] text-[#374151]">{order.shippingAddress.addressLine1}</p>
+                {order.shippingAddress.addressLine2 && (
+                  <p className="text-[13px] text-[#374151]">{order.shippingAddress.addressLine2}</p>
+                )}
+                <p className="text-[13px] text-[#374151]">
+                  {order.shippingAddress.city}, {order.shippingAddress.state} – {order.shippingAddress.pincode}
+                </p>
+                <p className="text-[13px] text-[#6B7280] mt-1">Phone: {order.shippingAddress.phone}</p>
+              </div>
+            </div>
+          </div>
+        )}
 
-      {/* ── Sticky bottom actions ── */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-[#E5E7EB] px-4 py-3 pb-5 flex gap-3 z-20">
-        <button className="flex-1 h-12 bg-accent text-white text-[15px] font-semibold rounded-xl">
-          Buy Now
-        </button>
-        <button className="flex-1 h-12 border border-accent text-accent text-[15px] font-semibold rounded-xl bg-white">
-          Add To Cart
-        </button>
+        {/* ── Payment ── */}
+        {tab === "Payment" && (
+          <div className="flex flex-col gap-3 pt-1">
+            <div className="border border-[#E5E7EB] rounded-xl overflow-hidden">
+              {[
+                { label: "Payment Method", value: order.paymentMethod.toUpperCase() },
+                { label: "Transaction ID", value: order.transactionId ?? "—" },
+                { label: "Advance Paid", value: order.advancePaid ? "Yes" : "No" },
+                { label: "Balance Paid", value: order.balancePaid ? "Yes" : "No" },
+                ...(order.neftReferenceNumber
+                  ? [{ label: "NEFT Ref (Advance)", value: order.neftReferenceNumber }]
+                  : []),
+                ...(order.balanceNeftReferenceNumber
+                  ? [{ label: "NEFT Ref (Balance)", value: order.balanceNeftReferenceNumber }]
+                  : []),
+                { label: "GST Invoice", value: order.requiresGstBill ? "Required" : "Not Required" },
+              ].map((row, i, arr) => (
+                <div
+                  key={row.label}
+                  className={`flex justify-between items-center px-4 py-3 ${
+                    i % 2 === 0 ? "bg-white" : "bg-[#F9FAFB]"
+                  } ${i < arr.length - 1 ? "border-b border-[#E5E7EB]" : ""}`}
+                >
+                  <span className="text-[12px] text-[#6B7280]">{row.label}</span>
+                  <span className="text-[12px] font-semibold text-[#111827] text-right max-w-[55%] break-all">{row.value}</span>
+                </div>
+              ))}
+            </div>
+
+            {order.salesRepName && (
+              <div className="border border-[#E5E7EB] rounded-xl p-4 flex gap-3">
+                <CreditCard className="w-5 h-5 text-accent shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-[13px] font-semibold text-[#111827]">Sales Representative</p>
+                  <p className="text-[13px] text-[#374151] mt-0.5">{order.salesRepName}</p>
+                  {order.salesRepPhone && (
+                    <p className="text-[12px] text-[#6B7280]">{order.salesRepPhone}</p>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {!order.salesRepName && (
+              <div className="flex items-center gap-3 bg-[#F9FAFB] rounded-xl p-4">
+                <Package className="w-5 h-5 text-[#9CA3AF] shrink-0" />
+                <p className="text-[13px] text-[#6B7280]">No sales representative assigned.</p>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

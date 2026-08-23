@@ -15,6 +15,7 @@ export function useBackButton(isRootRoute: boolean) {
   const router = useRouter();
   const pressedOnceRef = useRef(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isCapacitorRef = useRef(false);
 
   useEffect(() => {
     let capacitorCleanup: (() => void) | null = null;
@@ -42,7 +43,11 @@ export function useBackButton(isRootRoute: boolean) {
           }
         });
 
-        capacitorCleanup = () => handle.remove();
+        isCapacitorRef.current = true;
+        capacitorCleanup = () => {
+          handle.remove();
+          isCapacitorRef.current = false;
+        };
       } catch {
         // @capacitor/app not available — PWA/browser path handles it below
       }
@@ -57,6 +62,10 @@ export function useBackButton(isRootRoute: boolean) {
     }
 
     function handlePopState() {
+      // Capacitor already handled the back press via its own listener;
+      // if we also react here, the user ends up going back 2 screens.
+      if (isCapacitorRef.current) return;
+
       if (isRootRoute) {
         // Re-push sentinel so subsequent back presses don't close the app
         window.history.pushState({ __sentinel: true }, "");

@@ -218,6 +218,14 @@ function OrderConfirmationInner() {
           </button>
         </div>
 
+        {/* ── Go to Home ── */}
+        <button
+          onClick={() => router.push("/")}
+          className="w-full h-12 bg-accent text-white text-[15px] font-semibold rounded-2xl"
+        >
+          Go to Home
+        </button>
+
         {/* ── Deliver To ── */}
         {order.shippingAddress && (
           <div>

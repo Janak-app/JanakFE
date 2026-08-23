@@ -13,6 +13,7 @@ import ProductCard from "@/components/products/ProductCard";
 import useProductDetail from "@/hooks/useProductDetail";
 import { useCart } from "@/context/CartContext";
 import { useToast } from "@/context/ToastContext";
+import { useAddToWishlist } from "@/hooks/useWishlist";
 
 const TABS = ["Overview", "Key Specifications", "Reviews", "Downloads"] as const;
 type TabKey = typeof TABS[number];
@@ -23,6 +24,7 @@ export default function ProductDetailClient() {
   const router = useRouter();
   const { addItem, items, updateQty, cartCount } = useCart();
   const { show } = useToast();
+  const addToWishlist = useAddToWishlist();
 
   const { data, loading, isError } = useProductDetail(id);
   const product = data?.product ?? null;
@@ -83,7 +85,20 @@ export default function ProductDetailClient() {
           <GitCompare className="w-4 h-4 text-[#111827]" />
         </button>
         <button
-          onClick={() => { setWishlisted(!wishlisted); show(wishlisted ? "Removed from wishlist" : "Added to wishlist"); }}
+          onClick={async () => {
+            if (!wishlisted) {
+              try {
+                await addToWishlist.mutateAsync({ productId: product.id });
+                setWishlisted(true);
+                show("Added to wishlist");
+              } catch {
+                // error toast handled by useMutationApi
+              }
+            } else {
+              setWishlisted(false);
+              show("Removed from wishlist");
+            }
+          }}
           className="w-9 h-9 rounded-full bg-[#F5F5F7] flex items-center justify-center"
         >
           <Heart className={`w-4 h-4 ${wishlisted ? "fill-[#DC2626] text-[#DC2626]" : "text-[#111827]"}`} />

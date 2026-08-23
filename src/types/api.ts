@@ -62,6 +62,12 @@ export type ApiProduct = {
   updatedAt: string;
 };
 
+export type ApiWishlistItem = {
+  id: string;
+  product: ApiProduct;
+  savedAt: string;
+};
+
 export type ApiCartItem = {
   id: string;
   quantity: number;

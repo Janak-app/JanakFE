@@ -124,6 +124,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     deleteMutation.mutate(
       { dynamicEndpointSuffix: serverId },
       {
+        onSuccess: () => refetchCart(),
         onError: () => {
           // rollback
           setItems(snapshot);
@@ -148,7 +149,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
     updateTimers.current[productId] = setTimeout(() => {
       const serverId = serverIds.current[productId];
       if (!serverId) return; // item not yet synced to server, skip
-      updateMutation.mutate({ dynamicEndpointSuffix: serverId, quantity: qty });
+      updateMutation.mutate(
+        { dynamicEndpointSuffix: serverId, quantity: qty },
+        { onSuccess: () => refetchCart() }
+      );
     }, 700);
   };
 

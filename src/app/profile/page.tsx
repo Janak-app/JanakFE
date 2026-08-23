@@ -29,7 +29,7 @@ export default function ProfilePage() {
     { icon: Receipt, label: "My Orders", sub: "3 orders", href: "/orders" },
     { icon: FileText, label: "My Quotes", sub: "1 active", badge: "1", href: "/quote/list" },
     { icon: Wrench, label: "My Service Requests", sub: "1 confirmed", href: "/service/list" },
-    { icon: Heart, label: "My Wishlist", sub: "No items saved", onClick: () => show("No saved items yet", "info") },
+    { icon: Heart, label: "My Wishlist", sub: "Saved products", href: "/wishlist" },
     { icon: Cpu, label: "My Equipment", sub: "1 registered", onClick: () => show("Equipment registry — coming soon", "info") },
     { icon: Download, label: "Download Invoices", onClick: () => show("Preparing download...", "info") },
     { icon: Bell, label: "Notification Preferences", href: "/notifications" },

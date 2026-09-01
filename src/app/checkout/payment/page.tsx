@@ -48,7 +48,7 @@ export default function CheckoutPaymentPage() {
     if (!user) return;
     const isNative = Capacitor.isNativePlatform();
     const returnUrl = isNative
-      ? `${window.location.origin}/payment-result?source=native`
+      ? "janakapp://payment-result"
       : `${window.location.origin}/payment-result`;
 
     placeOrderMutation.mutate(
@@ -67,8 +67,10 @@ export default function CheckoutPaymentPage() {
               onSuccess: async (payment) => {
                 localStorage.setItem("merchantTxnNo", payment.merchantTxnNo);
                 if (isNative) {
-                  const { Browser } = await import("@capacitor/browser");
-                  await Browser.open({ url: payment.paymentUrl });
+                  // Open in system browser (not in-app browser) so the OS can
+                  // intercept the janakapp:// deep link after payment and return
+                  // the user to the app automatically.
+                  window.open(payment.paymentUrl, "_system");
                 } else {
                   window.location.href = payment.paymentUrl;
                 }

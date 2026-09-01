@@ -1,45 +1,26 @@
 "use client";
 
-import { useEffect, useState, Suspense } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { CheckCircle, XCircle, Loader2 } from "lucide-react";
 import Button from "@/components/ui/Button";
 import { usePaymentStatus } from "@/hooks/usePaymentStatus";
 import { useCart } from "@/context/CartContext";
 
-function PaymentResultInner() {
+export default function PaymentResultPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const { clearCart } = useCart();
   const [merchantTxnNo, setMerchantTxnNo] = useState<string | null>(null);
   const [cartCleared, setCartCleared] = useState(false);
 
-  const isNativeRedirect = searchParams.get("source") === "native";
-
-  // When opened in the browser as the payment gateway's returnUrl on native,
-  // immediately redirect back into the app using an intent URL (Android) or
-  // custom scheme (iOS). The app's deep link handler then navigates to
-  // /payment-result inside the WebView where merchantTxnNo is available.
   useEffect(() => {
-    if (!isNativeRedirect) return;
-    const isAndroid = /android/i.test(navigator.userAgent);
-    if (isAndroid) {
-      window.location.href =
-        "intent://payment-result#Intent;scheme=janakapp;package=com.janakpositioning.janakglobal;end";
-    } else {
-      window.location.href = "janakapp://payment-result";
-    }
-  }, [isNativeRedirect]);
-
-  useEffect(() => {
-    if (isNativeRedirect) return;
     const txnNo = localStorage.getItem("merchantTxnNo");
     if (!txnNo) {
       router.replace("/");
       return;
     }
     setMerchantTxnNo(txnNo);
-  }, [router, isNativeRedirect]);
+  }, [router]);
 
   const { status, loading, error } = usePaymentStatus({ merchantTxnNo });
 
@@ -50,10 +31,6 @@ function PaymentResultInner() {
       setCartCleared(true);
     }
   }, [status, cartCleared, clearCart]);
-
-  if (isNativeRedirect) {
-    return <PendingScreen message="Opening app…" />;
-  }
 
   if (!merchantTxnNo || (loading && !status)) {
     return <PendingScreen />;
@@ -101,19 +78,11 @@ function PaymentResultInner() {
   return <PendingScreen />;
 }
 
-export default function PaymentResultPage() {
-  return (
-    <Suspense fallback={<PendingScreen />}>
-      <PaymentResultInner />
-    </Suspense>
-  );
-}
-
-function PendingScreen({ message = "Confirming your payment…" }: { message?: string }) {
+function PendingScreen() {
   return (
     <div className="min-h-screen bg-white flex flex-col items-center justify-center gap-4 px-6">
       <Loader2 className="w-12 h-12 text-accent animate-spin" />
-      <p className="text-base font-semibold text-[#111827]">{message}</p>
+      <p className="text-base font-semibold text-[#111827]">Confirming your payment…</p>
       <p className="text-sm text-[#6B7280] text-center">
         Please wait, this may take a few seconds.
       </p>

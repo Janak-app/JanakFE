@@ -48,7 +48,7 @@ export default function CheckoutPaymentPage() {
     if (!user) return;
     const isNative = Capacitor.isNativePlatform();
     const returnUrl = isNative
-      ? "janakapp://payment-result"
+      ? `${window.location.origin}/payment-result?source=native`
       : `${window.location.origin}/payment-result`;
 
     placeOrderMutation.mutate(

@@ -39,7 +39,9 @@ function AuthGuard({ children }: { children: ReactNode }) {
   const isPublic =
     pathname.startsWith("/auth") ||
     pathname === "/privacy-policy" ||
-    pathname === "/terms";
+    pathname === "/terms" ||
+    pathname === "/payment-result" ||
+    pathname.startsWith("/payment/callback");
 
   useEffect(() => {
     if (!loading && !user && !isPublic) {

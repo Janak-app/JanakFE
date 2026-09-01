@@ -4,6 +4,7 @@ import type { ApiWishlistItem } from "@/types/api";
 
 interface WishlistPayload {
   productId: string;
+  [key: string]: unknown;
 }
 
 export function useWishlist() {

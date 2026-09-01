@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { Smartphone, Building2, CreditCard, ShieldCheck, AtSign, CheckCircle } from "lucide-react";
 import { Capacitor } from "@capacitor/core";
+import { useRouter } from "next/navigation";
 import Header from "@/components/layout/Header";
 import Button from "@/components/ui/Button";
 import StepIndicator from "@/components/ui/StepIndicator";
@@ -23,6 +24,7 @@ const METHODS: { key: PayMethod; label: string; sub: string; Icon: React.Element
 ];
 
 export default function CheckoutPaymentPage() {
+  const router = useRouter();
   const [method, setMethod] = useState<PayMethod>("upi");
   const [upiId, setUpiId] = useState("");
   const [addressId, setAddressId] = useState("");
@@ -67,10 +69,15 @@ export default function CheckoutPaymentPage() {
               onSuccess: async (payment) => {
                 localStorage.setItem("merchantTxnNo", payment.merchantTxnNo);
                 if (isNative) {
-                  // Open in system browser (not in-app browser) so the OS can
-                  // intercept the janakapp:// deep link after payment and return
-                  // the user to the app automatically.
-                  window.open(payment.paymentUrl, "_system");
+                  const { Browser } = await import("@capacitor/browser");
+                  // browserFinished fires when Chrome Custom Tabs closes — which
+                  // happens automatically when the payment gateway redirects to
+                  // janakapp:// (a scheme Chrome can't render as a web page).
+                  const listener = await Browser.addListener("browserFinished", () => {
+                    listener.remove();
+                    router.replace("/payment-result");
+                  });
+                  await Browser.open({ url: payment.paymentUrl });
                 } else {
                   window.location.href = payment.paymentUrl;
                 }

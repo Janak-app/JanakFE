@@ -49,8 +49,11 @@ export default function CheckoutPaymentPage() {
   const handlePay = () => {
     if (!user) return;
     const isNative = Capacitor.isNativePlatform();
+    // Native: send the gateway to our trampoline page (an HTTPS URL on our
+    // own domain). That page fires janakapp:// via JS, which is more reliable
+    // than asking Chrome Custom Tab to redirect straight to a custom scheme.
     const returnUrl = isNative
-      ? "janakapp://payment-result"
+      ? `${window.location.origin}/payment-complete`
       : `${window.location.origin}/payment-result`;
 
     placeOrderMutation.mutate(

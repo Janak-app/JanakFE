@@ -41,6 +41,7 @@ function AuthGuard({ children }: { children: ReactNode }) {
     pathname === "/privacy-policy" ||
     pathname === "/terms" ||
     pathname === "/payment-result" ||
+    pathname === "/payment-complete" ||
     pathname.startsWith("/payment/callback");
 
   useEffect(() => {

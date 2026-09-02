@@ -14,6 +14,20 @@ export function useDeepLink() {
       App.addListener("appUrlOpen", (data) => {
         if (data.url.startsWith("janakapp://payment-result")) {
           router.replace("/payment-result");
+          return;
+        }
+
+        if (data.url.startsWith("janakapp://order-success")) {
+          // Extract orderId query param if present.
+          // data.url looks like: janakapp://order-success?orderId=abc123
+          const queryString = data.url.split("?")[1] ?? "";
+          const params = new URLSearchParams(queryString);
+          const orderId = params.get("orderId");
+          router.replace(
+            orderId
+              ? `/checkout/success?orderId=${encodeURIComponent(orderId)}`
+              : "/checkout/success"
+          );
         }
       }).then((handle) => {
         removeListener = () => handle.remove();

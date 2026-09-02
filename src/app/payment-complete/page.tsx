@@ -1,57 +1,82 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Loader2 } from "lucide-react";
+import { Loader2, CheckCircle } from "lucide-react";
 
 /**
  * Deep-link trampoline page.
  *
- * The payment gateway always redirects to an HTTPS URL (this page) after
- * finishing payment. We immediately fire the janakapp:// deep link so the
- * native app is brought back to the foreground. This is more reliable than
- * asking the payment gateway to redirect straight to a custom URL scheme,
- * because Chrome Custom Tab can silently fail on janakapp:// redirects.
+ * The payment gateway redirects here (an HTTPS URL) after payment completes.
+ * We redirect the user back to the native app using two strategies in order:
  *
- * Flow (native):
- *   payment gateway → /payment-complete (Chrome Custom Tab)
- *   → window.location = janakapp://payment-result
- *   → Android intent opens/foregrounds the Janak app
- *   → Chrome Custom Tab closes → browserFinished fires
- *   → app navigates to /payment-result in the WebView
+ * 1. intent:// URL (Android) — Chrome Custom Tab on Android handles this
+ *    natively: it reads the package name, creates an Android Intent, and opens
+ *    the app. This is the most reliable method in Chrome Custom Tab.
  *
- * Flow (web / fallback):
- *   The deep link won't open anything, so we show a button instead.
+ * 2. janakapp:// deep link — fallback for iOS (SFSafariViewController handles
+ *    custom URL schemes from user-initiated navigation and from JS).
+ *
+ * If neither auto-redirect fires (plain web browser, or the app isn't
+ * installed), we show a button so the user can tap manually.
  */
+
+// Android intent URL — Chrome Custom Tab recognises this and opens the app.
+const INTENT_URL =
+  "intent://payment-result#Intent;scheme=janakapp;package=com.janakpositioning.janakglobal;S.browser_fallback_url=https%3A%2F%2Fjanak-fe-roan.vercel.app%2Fpayment-complete;end";
+
+// Fallback for iOS / plain browsers.
+const DEEP_LINK = "janakapp://payment-result";
+
 export default function PaymentCompletePage() {
   const [showFallback, setShowFallback] = useState(false);
 
   useEffect(() => {
-    // Attempt to open the app via deep link immediately.
-    window.location.href = "janakapp://payment-result";
+    const isAndroid = /android/i.test(navigator.userAgent);
 
-    // If the app didn't open within 2 s the user is probably on plain web —
-    // show the manual fallback button.
+    if (isAndroid) {
+      // intent:// is handled by Chrome (Custom Tab and regular) on Android.
+      // It creates a real Android Intent so the OS opens the app directly.
+      window.location.href = INTENT_URL;
+    } else {
+      // iOS: SFSafariViewController handles janakapp:// when triggered here.
+      window.location.href = DEEP_LINK;
+    }
+
+    // If the page is still visible after 2 s the auto-redirect didn't work —
+    // show a manual button the user can tap.
     const timer = setTimeout(() => setShowFallback(true), 2000);
     return () => clearTimeout(timer);
   }, []);
 
   return (
-    <div className="min-h-screen bg-white flex flex-col items-center justify-center gap-4 px-6">
-      <Loader2 className="w-12 h-12 text-accent animate-spin" />
-      <p className="text-base font-semibold text-[#111827]">
-        Payment received! Opening app…
-      </p>
-      <p className="text-sm text-[#6B7280] text-center">
-        You will be redirected back to the Janak app automatically.
-      </p>
+    <div className="min-h-screen bg-white flex flex-col items-center justify-center gap-6 px-6">
+      <div className="w-20 h-20 rounded-full bg-[#16A34A] flex items-center justify-center shadow-[0_8px_32px_rgba(22,163,74,0.3)]">
+        <CheckCircle className="w-12 h-12 text-white" />
+      </div>
+
+      <div className="text-center">
+        <h1 className="text-xl font-bold text-[#111827]">Payment Successful!</h1>
+        <p className="text-sm text-[#6B7280] mt-1">
+          Opening the Janak app…
+        </p>
+      </div>
+
+      {!showFallback && (
+        <Loader2 className="w-8 h-8 text-accent animate-spin" />
+      )}
 
       {showFallback && (
-        <a
-          href="janakapp://payment-result"
-          className="mt-4 inline-block bg-accent text-white text-sm font-semibold px-6 py-3 rounded-xl"
-        >
-          Open Janak App
-        </a>
+        <div className="flex flex-col items-center gap-3 w-full max-w-xs">
+          <p className="text-sm text-[#6B7280] text-center">
+            Tap the button below to return to the app.
+          </p>
+          <a
+            href={DEEP_LINK}
+            className="w-full text-center bg-accent text-white text-sm font-semibold px-6 py-3 rounded-xl"
+          >
+            Open Janak App
+          </a>
+        </div>
       )}
     </div>
   );

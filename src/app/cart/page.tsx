@@ -7,6 +7,7 @@ import { useCart } from "@/context/CartContext";
 import { useToast } from "@/context/ToastContext";
 import { formatINR } from "@/data/products";
 import AddressBottomSheet from "@/components/cart/AddressBottomSheet";
+import OffersBottomSheet from "@/components/cart/OffersBottomSheet";
 import { SavedAddress } from "@/components/checkout/AddressForm";
 import useFetchApi from "@/hooks/useFetchApi";
 
@@ -15,6 +16,8 @@ export default function CartPage() {
   const { items, serverItems, updateQty, removeItem, summary, cartCount, cartLoading, refetchCart } = useCart();
   const { show } = useToast();
   const [addressSheetOpen, setAddressSheetOpen] = useState(false);
+  const [offersSheetOpen, setOffersSheetOpen] = useState(false);
+  const [appliedCoupon, setAppliedCoupon] = useState<string | null>(null);
   const [selectedAddress, setSelectedAddress] = useState<SavedAddress | null>(null);
 
   const { data: addresses } = useFetchApi<SavedAddress[]>({
@@ -183,28 +186,36 @@ export default function CartPage() {
             {/* ── Coupons & Offers ── */}
             <div className="px-4 py-4">
               <p className="text-[15px] font-bold text-[#111827] mb-4">Coupons &amp; Offers</p>
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-full bg-[#EFF6FF] flex items-center justify-center shrink-0">
-                  <BadgePercent className="w-5 h-5 text-accent" />
+              {appliedCoupon ? (
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-full bg-[#EFF6FF] flex items-center justify-center shrink-0">
+                    <BadgePercent className="w-5 h-5 text-accent" />
+                  </div>
+                  <span className="flex-1 text-[14px] font-bold text-[#111827] tracking-wide">{appliedCoupon}</span>
+                  <button
+                    onClick={() => { setAppliedCoupon(null); show("Coupon removed", "info"); }}
+                    className="text-[13px] font-semibold text-[#DC2626]"
+                  >
+                    Remove
+                  </button>
                 </div>
-                <span className="flex-1 text-[14px] font-bold text-[#111827] tracking-wide">FIRSTBUY</span>
+              ) : (
                 <button
-                  onClick={() => show("Coupon applied!", "success")}
-                  className="bg-accent text-white text-[13px] font-semibold px-5 py-2 rounded-full"
+                  onClick={() => setOffersSheetOpen(true)}
+                  className="flex items-center gap-3 w-full text-left"
                 >
-                  Apply
+                  <div className="w-9 h-9 rounded-full bg-[#EFF6FF] flex items-center justify-center shrink-0">
+                    <BadgePercent className="w-5 h-5 text-accent" />
+                  </div>
+                  <span className="flex-1 text-[14px] text-[#6B7280]">Apply coupon or offer</span>
+                  <span className="text-[13px] font-bold text-accent">View All</span>
                 </button>
-              </div>
-              <p className="text-[12px] font-semibold text-[#16A34A] mt-2 ml-12">
-                You can save ₹1200 on this order
-              </p>
-              <div className="border-t border-dashed border-[#E5E7EB] my-4" />
-              <button
-                onClick={() => show("All offers coming soon", "info")}
-                className="w-full text-center text-[14px] font-semibold text-accent"
-              >
-                View All Offers
-              </button>
+              )}
+              {appliedCoupon && (
+                <p className="text-[12px] font-semibold text-[#16A34A] mt-2 ml-12">
+                  Coupon applied successfully!
+                </p>
+              )}
             </div>
             <div className="h-px bg-[#E5E7EB] mx-4" />
 
@@ -256,6 +267,11 @@ export default function CartPage() {
         onClose={() => setAddressSheetOpen(false)}
         onSelect={(addr) => setSelectedAddress(addr)}
         selectedId={selectedAddress?.id}
+      />
+      <OffersBottomSheet
+        isOpen={offersSheetOpen}
+        onClose={() => setOffersSheetOpen(false)}
+        onApply={(code) => { setAppliedCoupon(code); show(`Coupon "${code}" applied!`, "success"); refetchCart(); }}
       />
     </div>
   );

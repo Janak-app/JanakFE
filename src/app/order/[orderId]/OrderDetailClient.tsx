@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import {
   ChevronLeft,
   MapPin,
@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import StatusBadge from "@/components/ui/StatusBadge";
 import InfoBanner from "@/components/ui/InfoBanner";
+import PayBalanceBottomSheet from "@/components/order/PayBalanceBottomSheet";
 import {
   useOrder,
   formatOrderAmount,
@@ -23,13 +24,13 @@ const TABS = ["Summary", "Tracking", "Shipping", "Payment"] as const;
 type TabKey = typeof TABS[number];
 
 export default function OrderDetailClient() {
-  const searchParams = useSearchParams();
-  const id = searchParams.get("id") ?? "";
+  const { orderId } = useParams<{ orderId: string }>();
   const router = useRouter();
 
-  const { order, loading } = useOrder(id);
+  const { order, loading } = useOrder(orderId);
   const [imgIdx, setImgIdx] = useState(0);
   const [tab, setTab] = useState<TabKey>("Summary");
+  const [paySheetOpen, setPaySheetOpen] = useState(false);
 
   if (loading) {
     return (
@@ -134,7 +135,8 @@ export default function OrderDetailClient() {
         {order.advancePaid && !order.balancePaid && (
           <InfoBanner
             title={`Balance due: ${formatOrderAmount(order.balanceAmount)}`}
-            subtitle={`Advance of ${formatOrderAmount(order.advanceAmount)} paid`}
+            subtitle={`Advance of ${formatOrderAmount(order.advanceAmount)} paid · Tap to pay`}
+            onClick={() => setPaySheetOpen(true)}
           />
         )}
         {!order.advancePaid && (
@@ -195,13 +197,20 @@ export default function OrderDetailClient() {
                 { label: "Subtotal", value: formatOrderAmount(order.subtotal) },
                 { label: "GST", value: formatOrderAmount(order.gstAmount) },
                 { label: "Shipping", value: parseFloat(order.shippingAmount) === 0 ? "Free" : formatOrderAmount(order.shippingAmount) },
+                ...(parseFloat(order.discountAmount) > 0
+                  ? [{
+                      label: order.couponCode ? `Discount (${order.couponCode})` : "Discount",
+                      value: `−${formatOrderAmount(order.discountAmount)}`,
+                      highlight: true,
+                    }]
+                  : []),
               ].map((row, i) => (
                 <div
                   key={row.label}
                   className={`flex justify-between items-center px-4 py-3 ${i % 2 === 0 ? "bg-white" : "bg-[#F9FAFB]"} border-b border-[#E5E7EB]`}
                 >
                   <span className="text-[13px] text-[#6B7280]">{row.label}</span>
-                  <span className="text-[13px] font-medium text-[#111827]">{row.value}</span>
+                  <span className={`text-[13px] font-medium ${"highlight" in row && row.highlight ? "text-[#16A34A]" : "text-[#111827]"}`}>{row.value}</span>
                 </div>
               ))}
               <div className="flex justify-between items-center px-4 py-3 bg-white">
@@ -353,6 +362,13 @@ export default function OrderDetailClient() {
           </div>
         )}
       </div>
+
+      <PayBalanceBottomSheet
+        isOpen={paySheetOpen}
+        onClose={() => setPaySheetOpen(false)}
+        balanceAmount={formatOrderAmount(order.balanceAmount)}
+        orderId={order.orderId}
+      />
     </div>
   );
 }

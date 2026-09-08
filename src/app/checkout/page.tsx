@@ -10,6 +10,7 @@ import { usePlaceOrder } from "@/hooks/useCheckoutInitiate";
 import { usePaymentInitiate } from "@/hooks/usePaymentInitiate";
 import AddressBottomSheet from "@/components/cart/AddressBottomSheet";
 import { SavedAddress } from "@/components/checkout/AddressForm";
+import GstBottomSheet, { GstDetails } from "@/components/checkout/GstBottomSheet";
 import useFetchApi from "@/hooks/useFetchApi";
 
 export default function CheckoutPage() {
@@ -19,6 +20,8 @@ export default function CheckoutPage() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [addressSheetOpen, setAddressSheetOpen] = useState(false);
   const [selectedAddress, setSelectedAddress] = useState<SavedAddress | null>(null);
+  const [gstSheetOpen, setGstSheetOpen] = useState(false);
+  const [gstDetails, setGstDetails] = useState<GstDetails | null>(null);
 
   const { data: addresses } = useFetchApi<SavedAddress[]>({
     endpoint: "v1/addresses",
@@ -94,6 +97,29 @@ export default function CheckoutPage() {
                   className="text-[14px] font-semibold text-accent shrink-0"
                 >
                   Change
+                </button>
+              </div>
+            </div>
+            <div className="h-px bg-[#E5E7EB] mx-4" />
+
+            {/* ── GST Details ── */}
+            <div className="px-4 py-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-[15px] font-bold text-[#111827]">GST Details</p>
+                  {gstDetails ? (
+                    <p className="text-[13px] text-[#374151] mt-0.5">
+                      {gstDetails.companyName} · {gstDetails.gstin}
+                    </p>
+                  ) : (
+                    <p className="text-[13px] text-[#9CA3AF] mt-0.5">Optional — for business invoices</p>
+                  )}
+                </div>
+                <button
+                  onClick={() => setGstSheetOpen(true)}
+                  className="text-[14px] font-semibold text-accent shrink-0"
+                >
+                  {gstDetails ? "Edit" : "+ Add"}
                 </button>
               </div>
             </div>
@@ -220,6 +246,12 @@ export default function CheckoutPage() {
         onClose={() => setAddressSheetOpen(false)}
         onSelect={(addr) => setSelectedAddress(addr)}
         selectedId={selectedAddress?.id}
+      />
+
+      <GstBottomSheet
+        isOpen={gstSheetOpen}
+        onClose={() => setGstSheetOpen(false)}
+        onSuccess={(details) => setGstDetails(details)}
       />
     </div>
   );

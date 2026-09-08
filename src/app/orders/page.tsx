@@ -128,7 +128,7 @@ function OrderCard({ order }: { order: ApiOrder }) {
 
   return (
     <Link
-      href={`/order/detail?id=${order.id}`}
+      href={`/order/${order.id}`}
       className="block bg-white border border-[#E5E7EB] rounded-xl p-3.5 hover:shadow-sm transition-shadow"
     >
       <div className="flex items-start justify-between mb-3">

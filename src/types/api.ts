@@ -158,6 +158,7 @@ export type ApiOrderItem = {
   unitPrice: string;
   totalPrice: string;
   productName: string;
+  hsnCode: string | null;
   product: ApiProduct;
 };
 
@@ -177,6 +178,9 @@ export type ApiOrder = {
   subtotal: string;
   gstAmount: string;
   shippingAmount: string;
+  discountAmount: string;
+  couponCode: string | null;
+  invoiceUrl: string | null;
   totalAmount: string;
   shippingAddress: ApiOrderShippingAddress;
   paymentMethod: string;

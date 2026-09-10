@@ -1,12 +1,13 @@
 "use client";
 
-import { Suspense } from "react";
+import { Suspense, useState } from "react";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Copy, Download, ChevronRight, Loader2 } from "lucide-react";
 import { useToast } from "@/context/ToastContext";
 import { formatINR } from "@/data/products";
 import useFetchApi from "@/hooks/useFetchApi";
+import PayBalanceBottomSheet from "@/components/order/PayBalanceBottomSheet";
 
 type OrderImage = {
   id: string;
@@ -67,6 +68,7 @@ function OrderConfirmationInner() {
   const { show } = useToast();
   const searchParams = useSearchParams();
   const orderId = searchParams.get("orderId");
+  const [paySheetOpen, setPaySheetOpen] = useState(false);
 
   const { data: order, loading } = useFetchApi<OrderDetail>({
     endpoint: `v1/orders/${orderId}`,
@@ -94,7 +96,7 @@ function OrderConfirmationInner() {
   const customerName = order.shippingAddress?.fullName ?? "Customer";
 
   return (
-    <div className="min-h-screen bg-white pb-10">
+    <div className="min-h-screen bg-white pb-24">
 
       {/* ── Logo ── */}
       <div className="px-4 pb-4" style={{ paddingTop: "calc(var(--sat) + 1.25rem)" }}>
@@ -199,7 +201,7 @@ function OrderConfirmationInner() {
                 </div>
               </div>
               <button
-                onClick={() => show("Bank details coming soon", "info")}
+                onClick={() => setPaySheetOpen(true)}
                 className="flex items-center justify-between w-full pt-3 border-t border-[#E5E7EB]"
               >
                 <span className="text-[13px] font-semibold text-accent">View bank details for payment</span>
@@ -217,14 +219,6 @@ function OrderConfirmationInner() {
             Download Invoice
           </button>
         </div>
-
-        {/* ── Go to Home ── */}
-        <button
-          onClick={() => router.push("/")}
-          className="w-full h-12 bg-accent text-white text-[15px] font-semibold rounded-2xl"
-        >
-          Go to Home
-        </button>
 
         {/* ── Deliver To ── */}
         {order.shippingAddress && (
@@ -250,6 +244,23 @@ function OrderConfirmationInner() {
           </div>
         )}
 
+      </div>
+
+      <PayBalanceBottomSheet
+        isOpen={paySheetOpen}
+        onClose={() => setPaySheetOpen(false)}
+        balanceAmount={formatINR(balance)}
+        orderId={order.orderId}
+      />
+
+      {/* ── Go to Home (fixed bottom bar) ── */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white px-4 py-3" style={{ paddingBottom: "calc(var(--sab) + 0.75rem)" }}>
+        <button
+          onClick={() => router.push("/")}
+          className="w-full h-12 bg-accent text-white text-[15px] font-semibold rounded-2xl"
+        >
+          Go to Home
+        </button>
       </div>
     </div>
   );

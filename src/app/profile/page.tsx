@@ -28,13 +28,13 @@ export default function ProfilePage() {
   const menu = [
     { icon: Receipt, label: "My Orders", sub: "3 orders", href: "/orders" },
     { icon: FileText, label: "My Quotes", sub: "1 active", badge: "1", href: "/quote/list" },
-    { icon: Wrench, label: "My Service Requests", sub: "1 confirmed", href: "/service/list" },
+    // { icon: Wrench, label: "My Service Requests", sub: "1 confirmed", href: "/service/list" },
     { icon: Heart, label: "My Wishlist", sub: "Saved products", href: "/wishlist" },
-    { icon: Cpu, label: "My Equipment", sub: "1 registered", onClick: () => show("Equipment registry — coming soon", "info") },
-    { icon: Download, label: "Download Invoices", onClick: () => show("Preparing download...", "info") },
-    { icon: Bell, label: "Notification Preferences", href: "/notifications" },
-    { icon: MessageSquare, label: "Contact Support", sub: "Mon–Sat · 9AM–6PM", href: "/chat" },
-  ] as const;
+    // { icon: Cpu, label: "My Equipment", sub: "1 registered", onClick: () => show("Equipment registry — coming soon", "info") },
+    // { icon: Download, label: "Download Invoices", onClick: () => show("Preparing download...", "info") },
+    // { icon: Bell, label: "Notification Preferences", href: "/notifications" },
+    // { icon: MessageSquare, label: "Contact Support", sub: "Mon–Sat · 9AM–6PM", href: "/chat" },
+  ];
 
   return (
     <div className="min-h-screen bg-[#F5F5F7]">
@@ -75,7 +75,7 @@ export default function ProfilePage() {
         </div>
 
         {/* Compare CTA */}
-        <Link
+        {/* <Link
           href="/compare"
           className="mx-4 mt-3 bg-white border border-[#E5E7EB] rounded-xl p-3.5 flex items-center gap-3 hover:shadow-sm transition-shadow"
         >
@@ -87,7 +87,7 @@ export default function ProfilePage() {
             <p className="text-xs text-[#6B7280] mt-0.5">Compare specs side-by-side</p>
           </div>
           <ChevronRight className="w-4 h-4 text-[#9CA3AF]" />
-        </Link>
+        </Link> */}
 
         {/* Menu */}
         <div className="mx-4 mt-3 bg-white border border-[#E5E7EB] rounded-xl overflow-hidden">
@@ -115,7 +115,7 @@ export default function ProfilePage() {
             return "href" in m && m.href ? (
               <Link key={m.label} href={m.href}>{content}</Link>
             ) : (
-              <button key={m.label} onClick={"onClick" in m ? m.onClick : undefined} className="w-full text-left">
+              <button key={m.label} onClick={"onClick" in m ? (m as { onClick: () => void }).onClick : undefined} className="w-full text-left">
                 {content}
               </button>
             );

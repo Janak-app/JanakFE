@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import Image from "next/image";
+import Slider from "react-slick";
 import { useSearchParams, useRouter } from "next/navigation";
 import {
-  ChevronLeft, ChevronRight, GitCompare, Heart, Share2, Phone,
+  ChevronLeft, ChevronRight, Heart, Phone,
   Star, CheckCircle, ShoppingCart, ClipboardList, FileText, Download,
 } from "lucide-react";
 import StatusBadge from "@/components/ui/StatusBadge";
@@ -34,6 +35,17 @@ export default function ProductDetailClient() {
 
   const [tab, setTab] = useState<TabKey>("Overview");
   const [imgIdx, setImgIdx] = useState(0);
+  const sliderRef = useRef<Slider>(null);
+
+  const slickSettings = {
+    dots: false,
+    infinite: false,
+    speed: 300,
+    slidesToShow: 1,
+    slidesToScroll: 1,
+    arrows: false,
+    afterChange: (i: number) => setImgIdx(i),
+  };
   const [wishlisted, setWishlisted] = useState(false);
   const [askVisible, setAskVisible] = useState(false);
   const [askText, setAskText] = useState("");
@@ -78,12 +90,12 @@ export default function ProductDetailClient() {
           <ChevronLeft className="w-5 h-5 text-[#111827]" />
         </button>
         <div className="flex-1" />
-        <button
+        {/* <button
           onClick={() => show("Compare feature coming soon", "info")}
           className="w-9 h-9 rounded-full bg-[#F5F5F7] flex items-center justify-center"
         >
           <GitCompare className="w-4 h-4 text-[#111827]" />
-        </button>
+        </button> */}
         <button
           onClick={async () => {
             if (!wishlisted) {
@@ -103,30 +115,36 @@ export default function ProductDetailClient() {
         >
           <Heart className={`w-4 h-4 ${wishlisted ? "fill-[#DC2626] text-[#DC2626]" : "text-[#111827]"}`} />
         </button>
-        <button
+        {/* <button
           onClick={() => show("Link copied!", "success")}
           className="w-9 h-9 rounded-full bg-[#F5F5F7] flex items-center justify-center"
         >
           <Share2 className="w-4 h-4 text-[#111827]" />
-        </button>
+        </button> */}
       </div>
 
       <div className="flex-1 pb-32 max-w-3xl mx-auto w-full">
         {/* Image gallery */}
-        <div className="bg-[#F5F5F7] relative overflow-hidden">
-          <div className="relative h-72 md:h-96">
-            <Image
-              src={product.images[imgIdx]}
-              alt={product.name}
-              fill
-              className="object-contain"
-            />
-          </div>
+        <div className="bg-[#F5F5F7] overflow-hidden">
+          <Slider ref={sliderRef} {...slickSettings}>
+            {product.images.map((img, i) => (
+              <div key={i}>
+                <div className="relative h-72 md:h-96">
+                  <Image
+                    src={img}
+                    alt={product.name}
+                    fill
+                    className="object-contain"
+                  />
+                </div>
+              </div>
+            ))}
+          </Slider>
           <div className="flex justify-center gap-1.5 pb-3">
             {product.images.map((_, i) => (
               <button
                 key={i}
-                onClick={() => setImgIdx(i)}
+                onClick={() => sliderRef.current?.slickGoTo(i)}
                 className={`h-1.5 rounded-full transition-all ${i === imgIdx ? "w-5 bg-accent" : "w-1.5 bg-[#CBD5E1]"}`}
               />
             ))}
@@ -136,7 +154,10 @@ export default function ProductDetailClient() {
               {product.images.map((img, i) => (
                 <button
                   key={i}
-                  onClick={() => setImgIdx(i)}
+                  onClick={() => {
+                    sliderRef.current?.slickGoTo(i);
+                    setImgIdx(i);
+                  }}
                   className={`relative shrink-0 w-14 h-14 rounded-lg overflow-hidden border-2 transition-colors ${i === imgIdx ? "border-accent" : "border-transparent"}`}
                 >
                   <Image src={img} alt="" fill className="object-cover" />

@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
+import Slider from "react-slick";
 import { useParams, useRouter } from "next/navigation";
 import {
   ChevronLeft,
@@ -31,6 +32,17 @@ export default function OrderDetailClient() {
   const [imgIdx, setImgIdx] = useState(0);
   const [tab, setTab] = useState<TabKey>("Summary");
   const [paySheetOpen, setPaySheetOpen] = useState(false);
+  const sliderRef = useRef<Slider>(null);
+
+  const slickSettings = {
+    dots: false,
+    infinite: false,
+    speed: 300,
+    slidesToShow: 1,
+    slidesToScroll: 1,
+    arrows: false,
+    afterChange: (i: number) => setImgIdx(i),
+  };
 
   if (loading) {
     return (
@@ -85,20 +97,26 @@ export default function OrderDetailClient() {
       {/* ── Image carousel ── */}
       {images.length > 0 && (
         <div className="bg-[#F5F5F7] mx-4 rounded-2xl overflow-hidden">
-          <div className="h-64 flex items-center justify-center">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={images[imgIdx]}
-              alt={firstItem?.productName ?? "Product"}
-              className="w-full h-full object-contain p-4"
-            />
-          </div>
+          <Slider ref={sliderRef} {...slickSettings}>
+            {images.map((img, i) => (
+              <div key={i}>
+                <div className="h-64 flex items-center justify-center">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={img}
+                    alt={firstItem?.productName ?? "Product"}
+                    className="w-full h-full object-contain p-4"
+                  />
+                </div>
+              </div>
+            ))}
+          </Slider>
           {images.length > 1 && (
             <div className="flex justify-center gap-1.5 pb-3">
               {images.map((_, i) => (
                 <button
                   key={i}
-                  onClick={() => setImgIdx(i)}
+                  onClick={() => sliderRef.current?.slickGoTo(i)}
                   className={`h-1.5 rounded-full transition-all ${
                     i === imgIdx ? "w-5 bg-[#9CA3AF]" : "w-1.5 bg-[#D1D5DB]"
                   }`}

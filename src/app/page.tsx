@@ -52,7 +52,9 @@ export default function HomePage() {
         <NewArrivals />
 
         {/* CTA */}
-        <CtaBanner />
+        <div className="pb-20">
+          <CtaBanner />
+        </div>
       </main>
 
       {/* Pay Remaining Amount — mobile fixed banner above bottom tab bar */}

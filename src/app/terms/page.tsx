@@ -1,4 +1,7 @@
-import Header from "@/components/layout/Header";
+"use client";
+
+import { useRouter } from "next/navigation";
+import { ChevronLeft } from "lucide-react";
 import Footer from "@/components/layout/Footer";
 
 const SECTIONS = [
@@ -49,14 +52,24 @@ const SECTIONS = [
 ];
 
 export default function TermsPage() {
+  const router = useRouter();
+
   return (
     <div className="min-h-screen flex flex-col bg-white">
-      <Header />
+      <div className="flex items-center gap-2 px-4 pb-3 border-b border-[#E5E7EB]" style={{ paddingTop: "calc(var(--sat) + 0.75rem)" }}>
+        <button
+          onClick={() => router.back()}
+          className="w-9 h-9 flex items-center justify-center shrink-0"
+        >
+          <ChevronLeft className="w-5 h-5 text-[#111827]" />
+        </button>
+        <h1 className="text-[17px] font-bold text-[#111827]">Terms &amp; Conditions</h1>
+      </div>
 
-      <main className="flex-1 max-w-3xl mx-auto w-full px-6 py-14">
-        <p className="text-sm text-gray-400 mb-2">Last updated: January 1, 2026</p>
-        <h1 className="text-3xl font-bold text-gray-900 mb-4">Terms &amp; Conditions</h1>
-        <p className="text-gray-500 text-sm leading-7 mb-10">
+      <main className="flex-1 max-w-3xl mx-auto w-full px-6 py-2">
+        {/* <p className="text-sm text-gray-400 mb-2">Last updated: January 1, 2026</p>
+        <h1 className="text-3xl font-bold text-gray-900 mb-4">Terms &amp; Conditions</h1> */}
+        <p className="text-gray-500 text-sm leading-7 mb-2">
           Please read these Terms and Conditions carefully before using the Janak Positioning
           platform. These terms govern your access to and use of our website, mobile application,
           and related services offered by Janak Positioning Pvt. Ltd.
@@ -72,7 +85,7 @@ export default function TermsPage() {
         </div>
       </main>
 
-      <Footer />
+      {/* <Footer /> */}
     </div>
   );
 }

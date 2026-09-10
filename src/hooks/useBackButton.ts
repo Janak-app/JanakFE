@@ -6,21 +6,35 @@ import { useRouter } from "next/navigation";
 /**
  * Handles the Android hardware back button for both Capacitor (native) and PWA.
  *
- * - Capacitor: listens to the App `backButton` event and calls router.back().
+ * - Capacitor: listens to the App `backButton` event once (at mount).
  *   On root routes, shows a "press again to exit" toast before minimizing.
  *   On tab routes (e.g. /explore), navigates to the specified parentRoute.
- * - PWA / browser: pushes a sentinel history entry so the stack is never empty,
- *   then intercepts `popstate` to drive router.back().
+ *   On all other routes, calls router.back().
+ * - PWA / browser: pushes a sentinel history entry once so the stack is never
+ *   empty, then intercepts `popstate` to drive navigation.
+ *
+ * isRootRoute and parentRoute are tracked via refs so the one-time listener
+ * always reads the latest values without being re-registered on every navigation.
  */
-export function useBackButton(
-  isRootRoute: boolean,
-  parentRoute?: string
-) {
+export function useBackButton(isRootRoute: boolean, parentRoute?: string) {
   const router = useRouter();
   const pressedOnceRef = useRef(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isCapacitorRef = useRef(false);
 
+  // Refs mirror the latest prop values so the one-time effect closure stays fresh
+  const isRootRouteRef = useRef(isRootRoute);
+  const parentRouteRef = useRef(parentRoute);
+
+  // Sync refs whenever the route context changes — no side effects here
+  useEffect(() => {
+    isRootRouteRef.current = isRootRoute;
+    parentRouteRef.current = parentRoute;
+  }, [isRootRoute, parentRoute]);
+
+  // One-time setup: register Capacitor listener + PWA sentinel exactly once.
+  // Empty deps array is intentional — re-registering on every navigation is
+  // what caused the double-tap bug (a new sentinel entry was pushed each time).
   useEffect(() => {
     let capacitorCleanup: (() => void) | null = null;
 
@@ -29,7 +43,7 @@ export function useBackButton(
         const { App } = await import("@capacitor/app");
 
         const handle = await App.addListener("backButton", () => {
-          if (isRootRoute) {
+          if (isRootRouteRef.current) {
             if (pressedOnceRef.current) {
               App.minimizeApp();
             } else {
@@ -42,8 +56,8 @@ export function useBackButton(
                 pressedOnceRef.current = false;
               }, 2000);
             }
-          } else if (parentRoute) {
-            router.push(parentRoute);
+          } else if (parentRouteRef.current) {
+            router.push(parentRouteRef.current);
           } else {
             router.back();
           }
@@ -61,8 +75,8 @@ export function useBackButton(
 
     setupCapacitor();
 
-    // PWA / browser fallback: keep at least one sentinel entry in history
-    // so pressing back doesn't immediately close the PWA.
+    // PWA / browser fallback: push sentinel once so the history stack is never
+    // empty and a single back press won't close the PWA immediately.
     if (typeof window !== "undefined" && !window.history.state?.__sentinel) {
       window.history.pushState({ __sentinel: true }, "");
     }
@@ -72,11 +86,11 @@ export function useBackButton(
       // if we also react here, the user ends up going back 2 screens.
       if (isCapacitorRef.current) return;
 
-      if (isRootRoute) {
+      if (isRootRouteRef.current) {
         // Re-push sentinel so subsequent back presses don't close the app
         window.history.pushState({ __sentinel: true }, "");
-      } else if (parentRoute) {
-        router.push(parentRoute);
+      } else if (parentRouteRef.current) {
+        router.push(parentRouteRef.current);
       } else {
         router.back();
       }
@@ -89,5 +103,5 @@ export function useBackButton(
       window.removeEventListener("popstate", handlePopState);
       if (timerRef.current) clearTimeout(timerRef.current);
     };
-  }, [isRootRoute, parentRoute, router]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 }

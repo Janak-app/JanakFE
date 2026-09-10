@@ -8,10 +8,14 @@ import { useRouter } from "next/navigation";
  *
  * - Capacitor: listens to the App `backButton` event and calls router.back().
  *   On root routes, shows a "press again to exit" toast before minimizing.
+ *   On tab routes (e.g. /explore), navigates to the specified parentRoute.
  * - PWA / browser: pushes a sentinel history entry so the stack is never empty,
  *   then intercepts `popstate` to drive router.back().
  */
-export function useBackButton(isRootRoute: boolean) {
+export function useBackButton(
+  isRootRoute: boolean,
+  parentRoute?: string
+) {
   const router = useRouter();
   const pressedOnceRef = useRef(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -38,6 +42,8 @@ export function useBackButton(isRootRoute: boolean) {
                 pressedOnceRef.current = false;
               }, 2000);
             }
+          } else if (parentRoute) {
+            router.push(parentRoute);
           } else {
             router.back();
           }
@@ -69,6 +75,8 @@ export function useBackButton(isRootRoute: boolean) {
       if (isRootRoute) {
         // Re-push sentinel so subsequent back presses don't close the app
         window.history.pushState({ __sentinel: true }, "");
+      } else if (parentRoute) {
+        router.push(parentRoute);
       } else {
         router.back();
       }
@@ -81,5 +89,5 @@ export function useBackButton(isRootRoute: boolean) {
       window.removeEventListener("popstate", handlePopState);
       if (timerRef.current) clearTimeout(timerRef.current);
     };
-  }, [isRootRoute, router]);
+  }, [isRootRoute, parentRoute, router]);
 }

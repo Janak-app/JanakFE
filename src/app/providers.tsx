@@ -12,8 +12,9 @@ import { useDeepLink } from "@/hooks/useDeepLink";
 
 const queryClient = new QueryClient();
 
-const ROOT_ROUTES = ["/", "/explore"];
-const SHOW_TAB_ROUTES = ROOT_ROUTES;
+const ROOT_ROUTES = ["/"];
+const TAB_ROUTES: Record<string, string> = { "/explore": "/", "/profile": "/" };
+const SHOW_TAB_ROUTES = [...ROOT_ROUTES, ...Object.keys(TAB_ROUTES)];
 
 function useShowBottomTab() {
   const pathname = usePathname();
@@ -22,7 +23,9 @@ function useShowBottomTab() {
 
 function BackButtonHandler() {
   const pathname = usePathname();
-  useBackButton(ROOT_ROUTES.includes(pathname));
+  const isRoot = ROOT_ROUTES.includes(pathname);
+  const parentRoute = TAB_ROUTES[pathname];
+  useBackButton(isRoot, parentRoute);
   return null;
 }
 

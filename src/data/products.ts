@@ -10,6 +10,7 @@ export type Product = {
   stock: "In Stock" | "Limited Stock" | "On Order";
   images: string[];
   description: string;
+  keySpecification?: string | null;
   highlights: string[];
   specs: { label: string; value: string }[];
   reviews: { name: string; rating: number; date: string; text: string }[];

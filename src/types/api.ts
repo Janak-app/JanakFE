@@ -45,6 +45,7 @@ export type ApiProduct = {
   name: string;
   slug: string;
   description: string;
+  keySpecification?: string | null;
   price: string;
   stockStatus: "in_stock" | "out_of_stock" | "limited_stock";
   modelNumber: string;

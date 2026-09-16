@@ -39,6 +39,7 @@ export function mapApiProduct(p: ApiProduct): Product {
     stock: STOCK_MAP[p.stockStatus] ?? "On Order",
     images: sortedImages.map((img) => img.url),
     description: p.description,
+    keySpecification: p.keySpecification ?? null,
     highlights: [],
     specs: [...(p.specs ?? [])]
       .sort((a, b) => a.sortOrder - b.sortOrder)

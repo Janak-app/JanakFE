@@ -69,16 +69,49 @@ function OrderConfirmationInner() {
   const searchParams = useSearchParams();
   const orderId = searchParams.get("orderId");
   const [paySheetOpen, setPaySheetOpen] = useState(false);
+  const [downloadingInvoice, setDownloadingInvoice] = useState(false);
 
   const { data: order, loading } = useFetchApi<OrderDetail>({
     endpoint: `v1/orders/${orderId}`,
     cacheEnabled: false,
   });
 
+  const { retrieve: fetchInvoice } = useFetchApi<Blob>({
+    endpoint: `v1/orders/${orderId}/invoice`,
+    cacheEnabled: false,
+    retrieveOnMount: false,
+    errorOff: true,
+    options: { responseType: "blob" },
+  });
+
   const handleCopyOrderId = () => {
     if (!order?.orderId) return;
     navigator.clipboard.writeText(order.orderId);
     show("Order ID copied!", "success");
+  };
+
+  const handleDownloadInvoice = async () => {
+    if (!orderId || downloadingInvoice) return;
+    setDownloadingInvoice(true);
+    try {
+      const result = await fetchInvoice();
+      const blob = result.data?.data as Blob | undefined;
+      if (!result.data || result.isError || !blob) {
+        throw new Error("Invoice not available");
+      }
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `Invoice-${order?.orderId ?? orderId}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch {
+      show("Failed to download invoice", "error");
+    } finally {
+      setDownloadingInvoice(false);
+    }
   };
 
   if (loading || !order) {
@@ -212,10 +245,15 @@ function OrderConfirmationInner() {
 
           {/* Download Invoice */}
           <button
-            onClick={() => show("Preparing invoice...", "info")}
-            className="w-full mt-3 flex items-center justify-center gap-2 border border-[#E5E7EB] rounded-2xl py-4 text-[14px] font-semibold text-[#111827]"
+            onClick={handleDownloadInvoice}
+            disabled={downloadingInvoice}
+            className="w-full mt-3 flex items-center justify-center gap-2 border border-[#E5E7EB] rounded-2xl py-4 text-[14px] font-semibold text-[#111827] disabled:opacity-60"
           >
-            <Download className="w-5 h-5 text-[#374151]" />
+            {downloadingInvoice ? (
+              <Loader2 className="w-5 h-5 text-[#374151] animate-spin" />
+            ) : (
+              <Download className="w-5 h-5 text-[#374151]" />
+            )}
             Download Invoice
           </button>
         </div>
@@ -232,6 +270,7 @@ function OrderConfirmationInner() {
                 {order.shippingAddress.city}, {order.shippingAddress.state} — {order.shippingAddress.pincode}
               </p>
               <p className="text-[13px] text-[#374151] mt-2">Contact — {order.shippingAddress.phone}</p>
+              {/*
               <div className="border-t border-dashed border-[#E5E7EB] mt-4 pt-3">
                 <button
                   onClick={() => router.push("/checkout/address")}
@@ -240,6 +279,7 @@ function OrderConfirmationInner() {
                   Change delivery address
                 </button>
               </div>
+              */}
             </div>
           </div>
         )}

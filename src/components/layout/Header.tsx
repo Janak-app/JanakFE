@@ -4,13 +4,10 @@ import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
-import { /* ShoppingCart, */ User, Search, LogOut, ChevronDown, Navigation } from "lucide-react";
-// import { useCart } from "@/context/CartContext";
+import { ShoppingCart, User, Search, LogOut, ChevronDown } from "lucide-react";
+import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
 import useMutationApi from "@/hooks/useMutationApi";
-import useFetchApi from "@/hooks/useFetchApi";
-import AddressBottomSheet from "@/components/cart/AddressBottomSheet";
-import { SavedAddress } from "@/components/checkout/AddressForm";
 
 const NAV = [
   { label: "Home", href: "/" },
@@ -29,22 +26,10 @@ function getInitials(email: string) {
 export default function Header() {
   const pathname = usePathname();
   const router = useRouter();
-  // const { cartCount } = useCart();
+  const { cartCount } = useCart();
   const { user, loading } = useAuth();
   const [userMenuOpen, setUserMenuOpen] = useState(false);
-  const [addressSheetOpen, setAddressSheetOpen] = useState(false);
-  const [selectedAddress, setSelectedAddress] = useState<SavedAddress | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
-
-  const { data: addresses } = useFetchApi<SavedAddress[]>({
-    endpoint: "v1/addresses",
-  });
-
-  useEffect(() => {
-    if (!addresses?.length || selectedAddress) return;
-    const def = addresses.find((a) => a.isDefault) ?? addresses[0];
-    setSelectedAddress(def);
-  }, [addresses]);
 
   const { mutateAsync: logout, isPending: isLoggingOut } = useMutationApi({
     endpoint: "v1/auth/logout",
@@ -77,11 +62,11 @@ export default function Header() {
       style={{ paddingTop: "env(safe-area-inset-top)" }}
     >
 
-      {/* ── Mobile header (3-row layout) ── */}
+      {/* ── Mobile header (2-row layout) ── */}
       <div className="md:hidden px-4 pt-3 pb-3 flex flex-col gap-2">
 
         {/* Row 1: Logo */}
-        <div className="flex items-center justify-center">
+        <div className="flex items-center justify-start">
           <Link href="/">
             <Image
               src="/logo/janak-logo.svg"
@@ -93,42 +78,26 @@ export default function Header() {
           </Link>
         </div>
 
-        {/* Row 2: Delivery location */}
-        <button
-          onClick={() => setAddressSheetOpen(true)}
-          className="flex items-center justify-center gap-1.5"
-        >
-          <Navigation className="w-3.5 h-3.5 text-accent fill-[#1A4F9C]" />
-          <span className="text-[13px] font-semibold text-[#111827]">
-            {selectedAddress
-              ? `${selectedAddress.city}, ${selectedAddress.state}`
-              : "Select Delivery Address"}
-          </span>
-          <ChevronDown className="w-3.5 h-3.5 text-[#111827]" />
-        </button>
-
-        {/* Row 3: Search + Cart */}
+        {/* Row 2: Search + Cart */}
         <div className="flex items-center gap-2">
-          {/* <div className="flex-1 flex items-center gap-2 h-10 bg-white border border-[#E5E7EB] rounded-full px-4">
+          <div className="flex-1 flex items-center gap-2 h-11 bg-white border border-[#E5E7EB] rounded-full px-4">
             <Search className="w-4 h-4 text-[#9CA3AF] shrink-0" />
             <input
               placeholder="Search Product"
               className="flex-1 text-sm bg-transparent outline-none text-[#111827] placeholder:text-[#9CA3AF]"
             />
-          </div> */}
-          {/* <Link
+          </div>
+          <Link
             href="/cart"
-            className={`relative w-10 h-10 flex items-center justify-center rounded-xl shrink-0 transition-colors ${
-              cartCount > 0 ? "bg-accent" : "border border-[#E5E7EB]"
-            }`}
+            className="relative w-11 h-11 flex items-center justify-center rounded-2xl bg-accent shrink-0"
           >
-            <ShoppingCart className={`w-5 h-5 ${cartCount > 0 ? "text-white" : "text-[#111827]"}`} />
+            <ShoppingCart className="w-5 h-5 text-white" />
             {cartCount > 0 && (
-              <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-0.5 bg-[#1C1C1C] text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+              <span className="absolute -top-1.5 -right-1.5 min-w-[20px] h-5 px-1 bg-white border-2 border-accent text-accent text-[11px] font-bold rounded-full flex items-center justify-center">
                 {cartCount}
               </span>
             )}
-          </Link> */}
+          </Link>
         </div>
       </div>
 
@@ -237,13 +206,6 @@ export default function Header() {
           )}
         </div>
       </div>
-
-      <AddressBottomSheet
-        isOpen={addressSheetOpen}
-        onClose={() => setAddressSheetOpen(false)}
-        onSelect={(addr) => setSelectedAddress(addr)}
-        selectedId={selectedAddress?.id}
-      />
     </header>
   );
 }

@@ -14,6 +14,7 @@ type useFetchApiOptions<T> = {
   options?: {
     headers?: Record<string, string>;
     params?: Record<string, string | number | boolean>;
+    responseType?: "json" | "blob" | "text" | "arraybuffer" | "document" | "stream";
   };
   retry?: number;
   errorOff?: boolean;

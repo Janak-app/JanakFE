@@ -1,11 +1,16 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { Tag, ArrowRight } from "lucide-react";
 import useCategories from "@/hooks/useCategories";
+import useIsNativeApp from "@/hooks/useIsNativeApp";
+import { filterCategoriesForPlatform } from "@/utils/category";
 
 export default function ShopByCategory() {
   const { data: categories, loading } = useCategories();
+  const isNativeApp = useIsNativeApp();
+  const visibleCategories = filterCategoriesForPlatform(categories, isNativeApp);
 
   if (loading) {
     return (
@@ -51,14 +56,18 @@ export default function ShopByCategory() {
 
       {/* Mobile: horizontal scroll */}
       <div className="flex gap-3 overflow-x-auto pb-2 md:hidden [&::-webkit-scrollbar]:hidden">
-        {categories.map((cat) => (
+        {visibleCategories.map((cat) => (
           <Link
             key={cat.id}
             href={`/explore?cat=${cat.slug}`}
             className="flex flex-col items-center gap-2 shrink-0 w-40"
           >
-            <div className="w-40 h-40 rounded-2xl bg-[#E0EAF7] flex items-center justify-center">
-              <Tag className="w-10 h-10 text-accent" />
+            <div className="relative overflow-hidden w-40 h-40 rounded-2xl bg-[#E0EAF7] flex items-center justify-center">
+              {cat.image ? (
+                <Image src={cat.image} alt={cat.name} fill className="object-cover" />
+              ) : (
+                <Tag className="w-10 h-10 text-accent" />
+              )}
             </div>
             <p className="text-[14px] font-bold text-[#111827] text-center leading-tight">
               {cat.name}
@@ -69,15 +78,19 @@ export default function ShopByCategory() {
 
       {/* Desktop grid */}
       <div className="hidden md:grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {categories.map((cat) => (
+        {visibleCategories.map((cat) => (
           <Link
             key={cat.id}
             href={`/explore?cat=${cat.slug}`}
             className="group border border-[#E5E7EB] rounded-2xl p-6 flex flex-col gap-8 hover:shadow-md hover:border-accent/30 transition-all"
           >
             <div className="flex items-start justify-between">
-              <div className="w-12 h-12 rounded-xl bg-[#E0EAF7] flex items-center justify-center">
-                <Tag className="w-6 h-6 text-accent" />
+              <div className="relative overflow-hidden w-12 h-12 rounded-xl bg-[#E0EAF7] flex items-center justify-center">
+                {cat.image ? (
+                  <Image src={cat.image} alt={cat.name} fill className="object-cover" />
+                ) : (
+                  <Tag className="w-6 h-6 text-accent" />
+                )}
               </div>
               <div className="w-8 h-8 rounded-full border border-[#E5E7EB] flex items-center justify-center group-hover:border-accent group-hover:bg-[#E0EAF7] transition-colors">
                 <ArrowRight className="w-4 h-4 text-[#6B7280] group-hover:text-accent transition-colors" />

@@ -2,8 +2,11 @@ export type ApiCategory = {
   id: string;
   name: string;
   slug: string;
+  image: string | null;
   icon: string | null;
   isActive: boolean;
+  showOnApp: boolean;
+  showOnWebsite: boolean;
   sortOrder: number;
   createdAt: string;
   updatedAt: string;
@@ -94,15 +97,24 @@ export type ApiCart = {
   updatedAt: string;
 };
 
+export type ApiQuoteItem = {
+  id: string;
+  quantity: number;
+  product: ApiProduct;
+};
+
 export type ApiQuote = {
   id: string;
+  quoteId: string;
   status: "pending" | "quote_sent" | "accepted" | "declined";
+  intendedUse: string;
+  budgetRange: string;
+  timeline: string;
   notes: string | null;
-  quantity: number;
   quotedPrice: string | null;
   validUntil: string | null;
-  adminResponse: string | null;
-  product: ApiProduct;
+  adminResponse?: string | null;
+  items: ApiQuoteItem[];
   createdAt: string;
   updatedAt: string;
 };

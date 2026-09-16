@@ -2,12 +2,13 @@
 
 import { useState, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, Loader2 } from "lucide-react";
 import { useToast } from "@/context/ToastContext";
 import { useAuth } from "@/context/AuthContext";
 import { formatINR } from "@/data/products";
 import type { Product } from "@/data/products";
 import useProductDetail from "@/hooks/useProductDetail";
+import { useRaiseQuote } from "@/hooks/useRaiseQuote";
 import AddProductBottomSheet from "@/components/quote/AddProductBottomSheet";
 
 export interface QuoteItem {
@@ -18,6 +19,32 @@ export interface QuoteItem {
   price: number;
   qty: number;
 }
+
+const INTENDED_USE_OPTIONS = [
+  "Land survey",
+  "Construction",
+  "Mining",
+  "Agriculture",
+  "Infrastructure / Road survey",
+  "Research / Education",
+  "Other",
+];
+
+const TIMELINE_OPTIONS = [
+  "Immediately",
+  "Within 1 week",
+  "Within 2 weeks",
+  "Within a month",
+  "Flexible",
+];
+
+const BUDGET_RANGE_OPTIONS = [
+  "Under ₹1 Lakh",
+  "₹1-2 Lakh",
+  "₹2-5 Lakh",
+  "₹5-10 Lakh",
+  "Above ₹10 Lakh",
+];
 
 function QuoteRequestForm() {
   const searchParams = useSearchParams();
@@ -33,7 +60,9 @@ function QuoteRequestForm() {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState(user?.email ?? "");
-  const [quotationValue, setQuotationValue] = useState("");
+  const [intendedUse, setIntendedUse] = useState("");
+  const [timeline, setTimeline] = useState("");
+  const [budgetRange, setBudgetRange] = useState("");
   const [note, setNote] = useState("");
 
   const [items, setItems] = useState<QuoteItem[]>(() => {
@@ -91,9 +120,32 @@ function QuoteRequestForm() {
     });
   };
 
+  const raiseQuote = useRaiseQuote();
+
   const handleSubmit = () => {
-    show("Quotation request submitted!", "success");
-    setTimeout(() => router.replace("/quote/list"), 600);
+    if (items.length === 0) {
+      show("Add at least one product to raise a quotation", "error");
+      return;
+    }
+    if (!intendedUse || !timeline || !budgetRange) {
+      show("Please select intended use, timeline, and budget range", "error");
+      return;
+    }
+    raiseQuote.mutate(
+      {
+        items: items.map((it) => ({ productId: it.productId, quantity: it.qty })),
+        intendedUse,
+        timeline,
+        budgetRange,
+        notes: note || undefined,
+      },
+      {
+        onSuccess: () => {
+          show("Quotation request submitted!", "success");
+          router.replace("/quote/list");
+        },
+      }
+    );
   };
 
   return (
@@ -203,14 +255,41 @@ function QuoteRequestForm() {
           {totalMRP > 0 ? formatINR(totalMRP) : "—"}
         </p>
 
-        <p className="text-[13px] text-[#6B7280] mb-1.5">Quotation Value</p>
-        <input
-          value={quotationValue}
-          onChange={(e) => setQuotationValue(e.target.value.replace(/[^0-9]/g, ""))}
-          inputMode="numeric"
-          placeholder="Add Quotation value here"
-          className="w-full h-12 bg-white border border-[#E5E7EB] rounded-xl px-4 text-[14px] text-[#111827] placeholder:text-[#9CA3AF] outline-none focus:border-accent mb-4"
-        />
+        <p className="text-[13px] text-[#6B7280] mb-1.5">Intended Use</p>
+        <select
+          value={intendedUse}
+          onChange={(e) => setIntendedUse(e.target.value)}
+          className="w-full h-12 bg-white border border-[#E5E7EB] rounded-xl px-4 text-[14px] text-[#111827] outline-none focus:border-accent mb-4"
+        >
+          <option value="" disabled>Select intended use</option>
+          {INTENDED_USE_OPTIONS.map((opt) => (
+            <option key={opt} value={opt}>{opt}</option>
+          ))}
+        </select>
+
+        <p className="text-[13px] text-[#6B7280] mb-1.5">Timeline</p>
+        <select
+          value={timeline}
+          onChange={(e) => setTimeline(e.target.value)}
+          className="w-full h-12 bg-white border border-[#E5E7EB] rounded-xl px-4 text-[14px] text-[#111827] outline-none focus:border-accent mb-4"
+        >
+          <option value="" disabled>Select timeline</option>
+          {TIMELINE_OPTIONS.map((opt) => (
+            <option key={opt} value={opt}>{opt}</option>
+          ))}
+        </select>
+
+        <p className="text-[13px] text-[#6B7280] mb-1.5">Budget Range</p>
+        <select
+          value={budgetRange}
+          onChange={(e) => setBudgetRange(e.target.value)}
+          className="w-full h-12 bg-white border border-[#E5E7EB] rounded-xl px-4 text-[14px] text-[#111827] outline-none focus:border-accent mb-4"
+        >
+          <option value="" disabled>Select budget range</option>
+          {BUDGET_RANGE_OPTIONS.map((opt) => (
+            <option key={opt} value={opt}>{opt}</option>
+          ))}
+        </select>
 
         <p className="text-[13px] text-[#6B7280] mb-1.5">Additional Note</p>
         <textarea
@@ -234,9 +313,11 @@ function QuoteRequestForm() {
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-[#E5E7EB] px-4 py-3 pb-6 z-20">
         <button
           onClick={handleSubmit}
-          className="w-full h-13 bg-accent text-white text-[15px] font-bold rounded-xl py-3.5"
+          disabled={raiseQuote.isPending}
+          className="w-full h-13 bg-accent text-white text-[15px] font-bold rounded-xl py-3.5 disabled:opacity-60 flex items-center justify-center gap-2"
         >
-          Raise Quotation Request
+          {raiseQuote.isPending && <Loader2 className="w-4 h-4 animate-spin" />}
+          {raiseQuote.isPending ? "Submitting..." : "Raise Quotation Request"}
         </button>
       </div>
     </div>

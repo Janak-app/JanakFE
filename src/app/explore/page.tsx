@@ -10,6 +10,8 @@ import FeaturedCard from "@/components/products/FeaturedCard";
 import Button from "@/components/ui/Button";
 import useProducts, { ProductFilters } from "@/hooks/useProducts";
 import useCategories from "@/hooks/useCategories";
+import useIsNativeApp from "@/hooks/useIsNativeApp";
+import { filterCategoriesForPlatform } from "@/utils/category";
 
 export default function ExplorePage() {
   return (
@@ -43,10 +45,12 @@ function ExploreContent() {
 
   const { data: products = [], loading: productsLoading } = useProducts(filters);
   const { data: categories = [], loading: categoriesLoading } = useCategories();
+  const isNativeApp = useIsNativeApp();
+  const visibleCategories = filterCategoriesForPlatform(categories, isNativeApp);
 
   const tabs = [
     { key: "all", label: "All" },
-    ...categories.map((c) => ({ key: c.slug, label: c.name })),
+    ...visibleCategories.map((c) => ({ key: c.slug, label: c.name })),
   ];
 
   const loading = productsLoading || categoriesLoading;

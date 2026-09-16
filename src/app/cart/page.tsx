@@ -10,6 +10,7 @@ import AddressBottomSheet from "@/components/cart/AddressBottomSheet";
 import OffersBottomSheet from "@/components/cart/OffersBottomSheet";
 import { SavedAddress } from "@/components/checkout/AddressForm";
 import useFetchApi from "@/hooks/useFetchApi";
+import useMutationApi from "@/hooks/useMutationApi";
 
 export default function CartPage() {
   const router = useRouter();
@@ -24,6 +25,21 @@ export default function CartPage() {
     endpoint: "v1/addresses",
     cacheEnabled: false,
   });
+
+  const removeCouponMutation = useMutationApi<unknown, Record<string, never>>({
+    method: "delete",
+    endpoint: "v1/cart/coupon",
+  });
+
+  const handleRemoveCoupon = () => {
+    removeCouponMutation.mutate({}, {
+      onSuccess: () => {
+        setAppliedCoupon(null);
+        show("Coupon removed", "info");
+        refetchCart();
+      },
+    });
+  };
 
   useEffect(() => {
     refetchCart();
@@ -193,10 +209,11 @@ export default function CartPage() {
                   </div>
                   <span className="flex-1 text-[14px] font-bold text-[#111827] tracking-wide">{appliedCoupon}</span>
                   <button
-                    onClick={() => { setAppliedCoupon(null); show("Coupon removed", "info"); }}
-                    className="text-[13px] font-semibold text-[#DC2626]"
+                    onClick={handleRemoveCoupon}
+                    disabled={removeCouponMutation.isPending}
+                    className="text-[13px] font-semibold text-[#DC2626] disabled:text-[#9CA3AF] flex items-center gap-1"
                   >
-                    Remove
+                    {removeCouponMutation.isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : "Remove"}
                   </button>
                 </div>
               ) : (

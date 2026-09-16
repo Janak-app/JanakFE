@@ -5,6 +5,8 @@ import { X, Search, Loader2 } from "lucide-react";
 import BottomSheet from "@/components/ui/BottomSheet";
 import useProducts from "@/hooks/useProducts";
 import useCategories from "@/hooks/useCategories";
+import useIsNativeApp from "@/hooks/useIsNativeApp";
+import { filterCategoriesForPlatform } from "@/utils/category";
 import { useDebounce } from "@/hooks/shared/useDebounce";
 import { formatINR } from "@/data/products";
 import type { Product } from "@/data/products";
@@ -30,6 +32,8 @@ export default function AddProductBottomSheet({ isOpen, onClose, items, onAdd, o
   });
 
   const { data: categories = [], loading: categoriesLoading } = useCategories();
+  const isNativeApp = useIsNativeApp();
+  const visibleCategories = filterCategoriesForPlatform(categories, isNativeApp);
 
   const loading = productsLoading || categoriesLoading;
 
@@ -73,7 +77,7 @@ export default function AddProductBottomSheet({ isOpen, onClose, items, onAdd, o
           >
             All
           </button>
-          {categories.map((cat) => (
+          {visibleCategories.map((cat) => (
             <button
               key={cat.id}
               onClick={() => setActiveCategory(cat.slug === activeCategory ? "" : cat.slug)}

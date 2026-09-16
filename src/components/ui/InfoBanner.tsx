@@ -4,13 +4,15 @@ interface InfoBannerProps {
   title: string;
   subtitle: string;
   onClick?: () => void;
+  disabled?: boolean;
 }
 
-export default function InfoBanner({ title, subtitle, onClick }: InfoBannerProps) {
+export default function InfoBanner({ title, subtitle, onClick, disabled }: InfoBannerProps) {
   return (
     <button
       onClick={onClick}
-      className="w-full flex items-center gap-3 bg-[#FFC107] rounded-2xl px-4 py-3.5 text-left"
+      disabled={disabled}
+      className="w-full flex items-center gap-3 bg-[#FFC107] rounded-2xl px-4 py-3.5 text-left disabled:opacity-70"
     >
       {/* Icon */}
       <div className="w-9 h-9 rounded-xl bg-[#F0A500] flex items-center justify-center shrink-0">

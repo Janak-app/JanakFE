@@ -1,36 +1,13 @@
 'use client'
 
 import { useState } from 'react'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
-import { X, Info, Plus, MapPin, Loader2 } from 'lucide-react'
+import { X, Plus, Loader2 } from 'lucide-react'
 import BottomSheet from '@/components/ui/BottomSheet'
-import useMutationApi, { DynamicMutationPayload } from '@/hooks/useMutationApi'
-import useFetchApi from '@/hooks/useFetchApi'
+import useAddresses from '@/hooks/useAddresses'
 import { SavedAddress } from '@/components/checkout/AddressForm'
-
-interface AddressBottomSheetProps {
-  isOpen: boolean
-  onClose: () => void
-  onSelect: (address: SavedAddress) => void
-  selectedId?: string
-}
-
-const schema = z.object({
-  addressLine1: z.string().min(1, 'Required'),
-  addressLine2: z.string().optional(),
-  city: z.string().min(1, 'Required'),
-  state: z.string().min(1, 'Required'),
-  pincode: z.string().length(6, 'Enter valid pincode'),
-  fullName: z.string().min(1, 'Required'),
-  phone: z.string().min(10, 'Enter valid number').max(13),
-})
-
-type FormData = z.infer<typeof schema>
-
-const inputCls =
-  'w-full h-12 bg-transparent px-4 text-[14px] text-[#111827] placeholder:text-[#9CA3AF] outline-none'
+import AddressListItem from './AddressListItem'
+import AddressFormSheet from './AddressFormSheet'
+import { AddressBottomSheetProps, AddressFormMode } from './AddressBottomSheet.types'
 
 export default function AddressBottomSheet({
   isOpen,
@@ -38,44 +15,42 @@ export default function AddressBottomSheet({
   onSelect,
   selectedId,
 }: AddressBottomSheetProps) {
-  const [showForm, setShowForm] = useState(false)
-
-  const { data: addresses, loading: addressesLoading, retrieve: refetchAddresses } =
-    useFetchApi<SavedAddress[]>({
-      endpoint: 'v1/addresses',
-      cacheEnabled: false,
-    })
+  const [formMode, setFormMode] = useState<AddressFormMode | null>(null)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
 
   const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { isValid },
-  } = useForm<FormData>({
-    resolver: zodResolver(schema),
-    mode: 'onChange',
-  })
-
-  const mutation = useMutationApi<SavedAddress>({
-    method: 'post',
-    endpoint: 'v1/addresses',
-  })
-
-  const onSubmit = (data: FormData) => {
-    mutation.mutate({ ...data, label: 'HOME', isDefault: false } as DynamicMutationPayload, {
-      onSuccess: (saved) => {
-        onSelect(saved)
-        reset()
-        setShowForm(false)
-        onClose()
-        refetchAddresses()
-      },
-    })
-  }
+    addresses,
+    loading: addressesLoading,
+    refetch: refetchAddresses,
+    createMutation,
+    updateMutation,
+    deleteMutation,
+  } = useAddresses()
 
   const handleSelect = (addr: SavedAddress) => {
     onSelect(addr)
     onClose()
+  }
+
+  const handleSaved = (address: SavedAddress) => {
+    onSelect(address)
+    setFormMode(null)
+    onClose()
+    refetchAddresses()
+  }
+
+  const handleDelete = (address: SavedAddress) => {
+    setDeletingId(address.id)
+    deleteMutation.mutate(
+      { dynamicEndpointSuffix: address.id },
+      {
+        onSuccess: () => {
+          setDeletingId(null)
+          refetchAddresses()
+        },
+        onError: () => setDeletingId(null),
+      }
+    )
   }
 
   return (
@@ -101,103 +76,37 @@ export default function AddressBottomSheet({
             <div className="flex flex-col gap-3">
               <p className="text-[13px] font-semibold text-[#6B7280]">Saved Addresses</p>
               {addresses.map((addr) => (
-                <button
+                <AddressListItem
                   key={addr.id}
-                  type="button"
-                  onClick={() => handleSelect(addr)}
-                  className={`w-full text-left flex items-start gap-3 border rounded-xl p-3 transition-colors ${
-                    selectedId === addr.id
-                      ? 'border-accent bg-[#EFF6FF]'
-                      : 'border-[#E5E7EB] bg-white'
-                  }`}
-                >
-                  <div className={`mt-0.5 w-5 h-5 rounded-full border-2 shrink-0 flex items-center justify-center ${
-                    selectedId === addr.id ? 'border-accent' : 'border-[#D1D5DB]'
-                  }`}>
-                    {selectedId === addr.id && (
-                      <div className="w-2.5 h-2.5 rounded-full bg-accent" />
-                    )}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-0.5">
-                      <MapPin className="w-3.5 h-3.5 text-accent shrink-0" />
-                      <span className="text-[12px] font-bold text-accent uppercase tracking-wide">
-                        {addr.label}
-                      </span>
-                    </div>
-                    <p className="text-[13px] font-semibold text-[#111827]">{addr.fullName}</p>
-                    <p className="text-[12px] text-[#6B7280] leading-snug mt-0.5">
-                      {addr.addressLine1}
-                      {addr.addressLine2 ? `, ${addr.addressLine2}` : ''},{' '}
-                      {addr.city}, {addr.state} — {addr.pincode}
-                    </p>
-                    <p className="text-[12px] text-[#6B7280] mt-0.5">{addr.phone}</p>
-                  </div>
-                </button>
+                  address={addr}
+                  selected={selectedId === addr.id}
+                  deleting={deletingId === addr.id}
+                  onSelect={handleSelect}
+                  onEdit={(a) => setFormMode({ type: 'edit', address: a })}
+                  onDelete={handleDelete}
+                />
               ))}
             </div>
           ) : null}
 
-          {/* Add new address toggle */}
-          {!showForm ? (
+          {/* Add new address toggle / form */}
+          {!formMode ? (
             <button
               type="button"
-              onClick={() => setShowForm(true)}
+              onClick={() => setFormMode({ type: 'add' })}
               className="flex items-center gap-2 text-[14px] font-semibold text-accent py-2"
             >
               <Plus className="w-4 h-4" />
               Add New Address
             </button>
           ) : (
-            <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
-              <div className="flex items-center justify-between">
-                <p className="text-[14px] font-bold text-[#111827]">New Address</p>
-                <button
-                  type="button"
-                  onClick={() => { setShowForm(false); reset() }}
-                  className="text-[12px] text-[#6B7280] font-medium"
-                >
-                  Cancel
-                </button>
-              </div>
-
-              {/* Info banner */}
-              <div className="flex items-start gap-2.5 bg-[#FFFBEB] border border-[#FDE68A] rounded-xl px-3 py-3">
-                <Info className="w-4 h-4 text-[#D97706] shrink-0 mt-0.5" />
-                <p className="text-[12px] text-[#92400E] leading-snug">
-                  Ensure your address details are accurate for a smooth delivery experience
-                </p>
-              </div>
-
-              {/* Delivery Address */}
-              <div>
-                <p className="text-[13px] font-bold text-[#111827] mb-2">Delivery Address</p>
-                <div className="border border-[#E5E7EB] rounded-xl overflow-hidden divide-y divide-[#E5E7EB]">
-                  <input {...register('addressLine1')} placeholder="Building / House Name*" className={inputCls} />
-                  <input {...register('addressLine2')} placeholder="Street, Area, Block / Colony*" className={inputCls} />
-                  <input {...register('city')} placeholder="City*" className={inputCls} />
-                  <input {...register('state')} placeholder="State*" className={inputCls} />
-                  <input {...register('pincode')} placeholder="Pin code*" inputMode="numeric" maxLength={6} className={inputCls} />
-                </div>
-              </div>
-
-              {/* Contact Details */}
-              <div>
-                <p className="text-[13px] font-bold text-[#111827] mb-2">Contact Details</p>
-                <div className="border border-[#E5E7EB] rounded-xl overflow-hidden divide-y divide-[#E5E7EB]">
-                  <input {...register('fullName')} placeholder="Customer Name*" className={inputCls} />
-                  <input {...register('phone')} placeholder="Contact Number*" inputMode="tel" className={inputCls} />
-                </div>
-              </div>
-
-              <button
-                type="submit"
-                disabled={!isValid || mutation.isPending}
-                className="w-full py-4 bg-accent text-white text-[15px] font-bold rounded-2xl disabled:opacity-50"
-              >
-                {mutation.isPending ? 'Saving…' : 'Save Address'}
-              </button>
-            </form>
+            <AddressFormSheet
+              mode={formMode}
+              createMutation={createMutation}
+              updateMutation={updateMutation}
+              onSaved={handleSaved}
+              onCancel={() => setFormMode(null)}
+            />
           )}
         </div>
       </div>

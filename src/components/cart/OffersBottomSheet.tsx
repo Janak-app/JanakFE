@@ -69,16 +69,31 @@ export default function OffersBottomSheet({ isOpen, onClose, onApply }: OffersBo
     errorOff: true,
   })
 
+  const applyCouponMutation = useMutationApi<unknown, { code: string }>({
+    method: 'post',
+    endpoint: 'v1/cart/coupon',
+    errorOff: true,
+  })
+
   const validateAndApply = (code: string) => {
     setCoupon(code)
     setPendingCode(code)
     setInputError(null)
     mutation.mutate({ code }, {
       onSuccess: () => {
-        onApply(code)
-        setCoupon('')
-        setPendingCode(null)
-        onClose()
+        applyCouponMutation.mutate({ code }, {
+          onSuccess: () => {
+            onApply(code)
+            setCoupon('')
+            setPendingCode(null)
+            onClose()
+          },
+          onError: (err) => {
+            setPendingCode(null)
+            const msg = (err as AxiosError<{ message?: string }>)?.response?.data?.message
+            setInputError(msg || 'Failed to apply coupon')
+          },
+        })
       },
       onError: (err) => {
         setPendingCode(null)
@@ -94,7 +109,8 @@ export default function OffersBottomSheet({ isOpen, onClose, onApply }: OffersBo
     validateAndApply(trimmed)
   }
 
-  const isManualPending = mutation.isPending && pendingCode === coupon.trim().toUpperCase()
+  const isApplying = mutation.isPending || applyCouponMutation.isPending
+  const isManualPending = isApplying && pendingCode === coupon.trim().toUpperCase()
 
   return (
     <BottomSheet isOpen={isOpen} onClose={onClose} bottomSheetMaximumHeight={560}>
@@ -127,7 +143,7 @@ export default function OffersBottomSheet({ isOpen, onClose, onApply }: OffersBo
             <button
               type="button"
               onClick={handleManualApply}
-              disabled={!coupon.trim() || mutation.isPending}
+              disabled={!coupon.trim() || isApplying}
               className="text-[13px] font-bold text-accent disabled:text-[#9CA3AF] shrink-0 py-2 flex items-center gap-1"
             >
               {isManualPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : 'Apply'}
@@ -175,7 +191,7 @@ export default function OffersBottomSheet({ isOpen, onClose, onApply }: OffersBo
                   <button
                     type="button"
                     onClick={() => validateAndApply(item.code)}
-                    disabled={mutation.isPending}
+                    disabled={isApplying}
                     className="text-[13px] font-bold text-accent disabled:text-[#9CA3AF] shrink-0 py-1 flex items-center gap-1"
                   >
                     {pendingCode === item.code

@@ -11,10 +11,16 @@ import {
   Truck,
   CheckCircle2,
   Clock,
+  Download,
+  Loader2,
 } from "lucide-react";
 import StatusBadge from "@/components/ui/StatusBadge";
 import InfoBanner from "@/components/ui/InfoBanner";
 import PayBalanceBottomSheet from "@/components/order/PayBalanceBottomSheet";
+import { useToast } from "@/context/ToastContext";
+import { useAuth } from "@/context/AuthContext";
+import useFetchApi from "@/hooks/useFetchApi";
+import { usePaymentInitiate } from "@/hooks/usePaymentInitiate";
 import {
   useOrder,
   formatOrderAmount,
@@ -27,12 +33,68 @@ type TabKey = typeof TABS[number];
 export default function OrderDetailClient() {
   const { orderId } = useParams<{ orderId: string }>();
   const router = useRouter();
+  const { show } = useToast();
+  const { user } = useAuth();
 
   const { order, loading } = useOrder(orderId);
   const [imgIdx, setImgIdx] = useState(0);
   const [tab, setTab] = useState<TabKey>("Summary");
   const [paySheetOpen, setPaySheetOpen] = useState(false);
+  const [downloadingInvoice, setDownloadingInvoice] = useState(false);
+  const [isPayingAdvance, setIsPayingAdvance] = useState(false);
   const sliderRef = useRef<Slider>(null);
+
+  const paymentInitiate = usePaymentInitiate();
+
+  const { retrieve: fetchInvoice } = useFetchApi<Blob>({
+    endpoint: `v1/orders/${orderId}/invoice`,
+    cacheEnabled: false,
+    retrieveOnMount: false,
+    errorOff: true,
+    options: { responseType: "blob" },
+  });
+
+  const handleDownloadInvoice = async () => {
+    if (!orderId || downloadingInvoice) return;
+    setDownloadingInvoice(true);
+    try {
+      const result = await fetchInvoice();
+      const blob = result.data?.data as Blob | undefined;
+      if (!result.data || result.isError || !blob) {
+        throw new Error("Invoice not available");
+      }
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `Invoice-${order?.orderId ?? orderId}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch {
+      show("Failed to download invoice", "error");
+    } finally {
+      setDownloadingInvoice(false);
+    }
+  };
+
+  const handlePayAdvance = async () => {
+    if (!order) return;
+    setIsPayingAdvance(true);
+    try {
+      const payment = await paymentInitiate.mutateAsync({
+        orderId: order.orderId,
+        customerName: order.shippingAddress.fullName,
+        customerEmail: user?.email ?? "",
+        customerMobile: order.shippingAddress.phone,
+      });
+      sessionStorage.setItem("merchantTxnNo", payment.merchantTxnNo);
+      window.location.href = payment.paymentUrl;
+    } catch {
+      show("Failed to start payment", "error");
+      setIsPayingAdvance(false);
+    }
+  };
 
   const slickSettings = {
     dots: false,
@@ -160,7 +222,9 @@ export default function OrderDetailClient() {
         {!order.advancePaid && (
           <InfoBanner
             title={`Advance payment pending: ${formatOrderAmount(order.advanceAmount)}`}
-            subtitle="Pay advance to confirm your order"
+            subtitle={isPayingAdvance ? "Redirecting to payment..." : "Pay advance to confirm your order · Tap to pay"}
+            onClick={handlePayAdvance}
+            disabled={isPayingAdvance}
           />
         )}
 
@@ -256,6 +320,20 @@ export default function OrderDetailClient() {
                 </div>
               </div>
             </div>
+
+            {/* Download Invoice */}
+            <button
+              onClick={handleDownloadInvoice}
+              disabled={downloadingInvoice}
+              className="w-full flex items-center justify-center gap-2 border border-[#E5E7EB] rounded-2xl py-4 text-[14px] font-semibold text-[#111827] disabled:opacity-60"
+            >
+              {downloadingInvoice ? (
+                <Loader2 className="w-5 h-5 text-[#374151] animate-spin" />
+              ) : (
+                <Download className="w-5 h-5 text-[#374151]" />
+              )}
+              Download Invoice
+            </button>
           </div>
         )}
 
@@ -358,6 +436,7 @@ export default function OrderDetailClient() {
               ))}
             </div>
 
+            {/*
             {order.salesRepName && (
               <div className="border border-[#E5E7EB] rounded-xl p-4 flex gap-3">
                 <CreditCard className="w-5 h-5 text-accent shrink-0 mt-0.5" />
@@ -377,6 +456,7 @@ export default function OrderDetailClient() {
                 <p className="text-[13px] text-[#6B7280]">No sales representative assigned.</p>
               </div>
             )}
+            */}
           </div>
         )}
       </div>

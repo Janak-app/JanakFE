@@ -5,33 +5,9 @@ import { ChevronLeft, ChevronRight, FileText } from "lucide-react";
 import Header from "@/components/layout/Header";
 import StatusBadge from "@/components/ui/StatusBadge";
 import { useQuotes } from "@/hooks/useQuotes";
-import { ApiQuote } from "@/types/api";
 import { useRouter } from "next/navigation";
-
-const STATUS_MAP: Record<ApiQuote["status"], string> = {
-  pending: "Pending",
-  quote_sent: "Quote Sent",
-  accepted: "Accepted",
-  declined: "Declined",
-};
-
-function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString("en-IN", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  });
-}
-
-function formatPrice(price: string) {
-  const num = Math.round(parseFloat(price));
-  return "₹" + num.toLocaleString("en-IN");
-}
-
-function getPrimaryImage(quote: ApiQuote): string {
-  const primary = quote.product.images.find((img) => img.isPrimary);
-  return primary?.url ?? quote.product.images[0]?.url ?? "";
-}
+import { QUOTE_STATUS_LABELS, formatQuoteDate, formatQuotePrice } from "@/utils/quote";
+import { getPrimaryProductImage } from "@/utils/product";
 
 export default function QuoteListPage() {
   const { quotes, loading } = useQuotes();
@@ -90,43 +66,52 @@ export default function QuoteListPage() {
                 <p className="text-xs text-[#6B7280]">Your submitted quote requests will appear here</p>
               </div>
             ) : (
-              quotes.map((q) => (
-                <Link
-                  key={q.id}
-                  href={`/quote/detail?id=${q.id}`}
-                  className="block bg-white border border-[#E5E7EB] rounded-xl p-3.5 hover:shadow-sm transition-shadow"
-                >
-                  <div className="flex items-start justify-between mb-3">
-                    <div>
-                      <p className="text-[13px] font-bold text-[#111827]">{q.id}</p>
-                      <p className="text-[11px] text-[#6B7280] mt-0.5">Submitted on {formatDate(q.createdAt)}</p>
+              quotes.map((q) => {
+                const product = q.items[0]?.product;
+                const extraItems = q.items.length - 1;
+                return (
+                  <Link
+                    key={q.id}
+                    href={`/quote/detail?id=${q.id}`}
+                    className="block bg-white border border-[#E5E7EB] rounded-xl p-3.5 hover:shadow-sm transition-shadow"
+                  >
+                    <div className="flex items-start justify-between mb-3">
+                      <div>
+                        <p className="text-[13px] font-bold text-[#111827]">{q.quoteId}</p>
+                        <p className="text-[11px] text-[#6B7280] mt-0.5">Submitted on {formatQuoteDate(q.createdAt)}</p>
+                      </div>
+                      <StatusBadge status={QUOTE_STATUS_LABELS[q.status] ?? q.status} />
                     </div>
-                    <StatusBadge status={STATUS_MAP[q.status] ?? q.status} />
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <img
-                      src={getPrimaryImage(q)}
-                      alt={q.product.name}
-                      className="w-14 h-16 rounded-lg object-cover bg-[#F5F5F7] shrink-0"
-                    />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-[13px] font-semibold text-[#111827] leading-snug line-clamp-2">{q.product.name}</p>
-                      {q.quotedPrice ? (
-                        <div className="flex items-baseline gap-1.5 mt-1.5">
-                          <span className="text-[11px] text-[#6B7280]">Quoted</span>
-                          <span className="text-[15px] font-bold text-accent">{formatPrice(q.quotedPrice)}</span>
-                        </div>
-                      ) : (
-                        <p className="text-[12px] text-[#6B7280] mt-1.5">Awaiting quote</p>
-                      )}
-                      {q.validUntil && (
-                        <p className="text-[11px] text-[#F59E0B] mt-0.5">Valid until {formatDate(q.validUntil)}</p>
-                      )}
+                    <div className="flex items-center gap-3">
+                      <img
+                        src={getPrimaryProductImage(product)}
+                        alt={product?.name ?? "Product"}
+                        className="w-14 h-16 rounded-lg object-cover bg-[#F5F5F7] shrink-0"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[13px] font-semibold text-[#111827] leading-snug line-clamp-2">
+                          {product?.name ?? "—"}
+                          {extraItems > 0 && (
+                            <span className="text-[#6B7280] font-normal"> +{extraItems} more</span>
+                          )}
+                        </p>
+                        {q.quotedPrice ? (
+                          <div className="flex items-baseline gap-1.5 mt-1.5">
+                            <span className="text-[11px] text-[#6B7280]">Quoted</span>
+                            <span className="text-[15px] font-bold text-accent">{formatQuotePrice(q.quotedPrice)}</span>
+                          </div>
+                        ) : (
+                          <p className="text-[12px] text-[#6B7280] mt-1.5">Awaiting quote</p>
+                        )}
+                        {q.validUntil && (
+                          <p className="text-[11px] text-[#F59E0B] mt-0.5">Valid until {formatQuoteDate(q.validUntil)}</p>
+                        )}
+                      </div>
+                      <ChevronRight className="w-4 h-4 text-[#9CA3AF] shrink-0" />
                     </div>
-                    <ChevronRight className="w-4 h-4 text-[#9CA3AF] shrink-0" />
-                  </div>
-                </Link>
-              ))
+                  </Link>
+                );
+              })
             )}
           </div>
         </div>

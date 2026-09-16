@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { ChevronRight } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { formatINR } from '@/data/products'
@@ -33,6 +33,10 @@ export default function PayRemainingBanner() {
   const router = useRouter()
   const [activeIndex, setActiveIndex] = useState(0)
   const [animating, setAnimating] = useState(false)
+  const [dragX, setDragX] = useState(0)
+  const [isDragging, setIsDragging] = useState(false)
+  const touchStart = useRef<{ x: number; y: number } | null>(null)
+  const wasSwipe = useRef(false)
 
   const { data } = useFetchApi<PendingBalance[]>({
     endpoint: 'v1/orders/pending-balance',
@@ -46,16 +50,60 @@ export default function PayRemainingBanner() {
   const { orderId, balanceAmount, estimatedDeliveryEnd } = unpaidOrders[safeIndex]
   const pendingAmount = parseFloat(balanceAmount)
   const daysLeft = estimatedDeliveryEnd ? daysUntil(estimatedDeliveryEnd) : null
-  const remaining = unpaidOrders.length - 1 - safeIndex
 
-  const cycleNext = (e: React.MouseEvent) => {
-    e.stopPropagation()
-    if (animating) return
+  const cycleTo = (direction: 1 | -1) => {
+    if (animating || unpaidOrders.length < 2) return
     setAnimating(true)
     setTimeout(() => {
-      setActiveIndex((i) => (i + 1) % unpaidOrders.length)
+      setActiveIndex((i) => (i + direction + unpaidOrders.length) % unpaidOrders.length)
       setAnimating(false)
     }, 250)
+  }
+
+  const handleGhostClick = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    cycleTo(1)
+  }
+
+  const SWIPE_THRESHOLD = 45
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (unpaidOrders.length < 2 || animating) return
+    const t = e.touches[0]
+    touchStart.current = { x: t.clientX, y: t.clientY }
+    setIsDragging(true)
+  }
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!touchStart.current) return
+    const t = e.touches[0]
+    const dx = t.clientX - touchStart.current.x
+    const dy = t.clientY - touchStart.current.y
+    if (Math.abs(dx) > Math.abs(dy)) {
+      setDragX(dx)
+    }
+  }
+
+  const handleTouchEnd = () => {
+    if (!touchStart.current) return
+    touchStart.current = null
+    setIsDragging(false)
+    if (dragX <= -SWIPE_THRESHOLD) {
+      wasSwipe.current = true
+      cycleTo(1)
+    } else if (dragX >= SWIPE_THRESHOLD) {
+      wasSwipe.current = true
+      cycleTo(-1)
+    }
+    setDragX(0)
+  }
+
+  const handleCardClick = () => {
+    if (wasSwipe.current) {
+      wasSwipe.current = false
+      return
+    }
+    router.push(`/order/${orderId}`)
   }
 
   return (
@@ -68,18 +116,18 @@ export default function PayRemainingBanner() {
       <div className="relative pb-5 mb-3">
 
         {/* Back ghost card (z-index 1) — peeks 20px below main card */}
-        {remaining >= 2 && (
+        {unpaidOrders.length >= 3 && (
           <button
-            onClick={cycleNext}
+            onClick={handleGhostClick}
             className="absolute bottom-0 left-6 right-6 h-14 bg-[#F5B944]/55 rounded-2xl"
             style={{ zIndex: 1 }}
           />
         )}
 
         {/* Middle ghost card (z-index 2) — peeks 14px below main card */}
-        {remaining >= 1 && (
+        {unpaidOrders.length >= 2 && (
           <button
-            onClick={cycleNext}
+            onClick={handleGhostClick}
             className="absolute bottom-[6px] left-3 right-3 h-14 bg-[#F5B944]/75 rounded-2xl"
             style={{ zIndex: 2 }}
           />
@@ -111,16 +159,20 @@ export default function PayRemainingBanner() {
 
         {/* Main card (z-index 3) — sits above ghost cards, covers their top portion */}
         <div
-          className="relative transition-all duration-250"
+          className="relative"
           style={{
             zIndex: 3,
-            transform: animating ? 'translateY(-6px) scale(0.97)' : 'translateY(0) scale(1)',
+            transform: animating ? 'translateY(-6px) scale(0.97)' : `translateX(${dragX}px)`,
             opacity: animating ? 0 : 1,
-            transition: 'transform 0.25s ease, opacity 0.25s ease',
+            transition: isDragging ? 'none' : 'transform 0.25s ease, opacity 0.25s ease',
           }}
         >
           <button
-            onClick={() => router.push(`/order/${orderId}`)}
+            onClick={handleCardClick}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+            style={{ touchAction: 'pan-y' }}
             className="w-full flex items-center gap-3 bg-[#F5B944] rounded-2xl px-4 py-4 shadow-lg"
           >
             <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shrink-0">

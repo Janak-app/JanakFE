@@ -4,6 +4,8 @@ import useFetchApi from "./useFetchApi";
 export interface MeUser {
   id: string;
   email: string;
+  // null for accounts created before phone became mandatory
+  phone?: string | null;
   role: "customer" | "admin" | "guest";
 }
 

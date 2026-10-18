@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -7,6 +8,7 @@ import {
   Bell, MessageSquare, GitCompare, LogOut, ChevronRight, ShieldCheck, ScrollText, ChevronLeft,
 } from "lucide-react";
 import Header from "@/components/layout/Header";
+import ConfirmModal from "@/components/ui/ConfirmModal";
 import { useToast } from "@/context/ToastContext";
 import { useAuth } from "@/context/AuthContext";
 
@@ -18,11 +20,11 @@ export default function ProfilePage() {
   const initials = user?.email?.slice(0, 2).toUpperCase() ?? "?";
   const roleLabel = user?.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : "";
 
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+
   const handleLogout = () => {
-    if (window.confirm("Are you sure you want to logout?")) {
-      localStorage.removeItem("accessToken");
-      router.replace("/auth");
-    }
+    localStorage.removeItem("accessToken");
+    router.replace("/auth");
   };
 
   const menu = [
@@ -33,7 +35,7 @@ export default function ProfilePage() {
     // { icon: Cpu, label: "My Equipment", sub: "1 registered", onClick: () => show("Equipment registry — coming soon", "info") },
     // { icon: Download, label: "Download Invoices", onClick: () => show("Preparing download...", "info") },
     // { icon: Bell, label: "Notification Preferences", href: "/notifications" },
-    // { icon: MessageSquare, label: "Contact Support", sub: "Mon–Sat · 9AM–6PM", href: "/chat" },
+    { icon: MessageSquare, label: "Contact Support", sub: "Mon–Sat · 9AM–6PM", href: "/contact" },
   ];
 
   return (
@@ -69,7 +71,7 @@ export default function ProfilePage() {
             <div className="w-px bg-[#E5E7EB]" />
             <div className="flex-1 flex flex-col items-center">
               <span className="text-[10px] font-medium text-[#6B7280] tracking-[1px] uppercase mb-1">Phone</span>
-              <span className="text-xs font-semibold text-[#111827]">—</span>
+              <span className="text-xs font-semibold text-[#111827]">{user?.phone ?? "—"}</span>
             </div>
           </div>
         </div>
@@ -143,7 +145,7 @@ export default function ProfilePage() {
         {/* Logout */}
         <div className="mx-4 mt-3 bg-white border border-[#E5E7EB] rounded-xl overflow-hidden">
           <button
-            onClick={handleLogout}
+            onClick={() => setShowLogoutConfirm(true)}
             className="w-full flex items-center gap-3 px-3.5 py-3.5 text-left"
           >
             <div className="w-8 h-8 rounded-[10px] bg-[#FEE2E2] flex items-center justify-center">
@@ -157,6 +159,17 @@ export default function ProfilePage() {
           Janak Positioning · v1.0.0 (Prototype)
         </p>
       </div>
+
+      <ConfirmModal
+        open={showLogoutConfirm}
+        icon={LogOut}
+        variant="danger"
+        title="Logout?"
+        message="Are you sure you want to logout of your account?"
+        confirmLabel="Logout"
+        onConfirm={handleLogout}
+        onCancel={() => setShowLogoutConfirm(false)}
+      />
     </div>
   );
 }

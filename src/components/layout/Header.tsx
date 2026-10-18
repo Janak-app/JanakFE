@@ -16,7 +16,7 @@ const NAV = [
   // { label: "Catalog", href: "/explore" },
   // { label: "Service", href: "/service/book" },
   // { label: "Quotes", href: "/quote/list" },
-  // { label: "Contact", href: "/chat" },
+  { label: "Contact", href: "/contact" },
 ];
 
 function getInitials(email: string) {

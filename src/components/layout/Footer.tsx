@@ -22,7 +22,7 @@ const NAV_LINKS = {
     { label: "Press & Media", href: "/" },
   ],
   Support: [
-    { label: "Contact Sales", href: "/chat" },
+    { label: "Contact Us", href: "/contact" },
     { label: "Request a Quote", href: "/quote" },
     { label: "Book Service", href: "/service/book" },
     { label: "Calibration & AMC", href: "/service/book" },

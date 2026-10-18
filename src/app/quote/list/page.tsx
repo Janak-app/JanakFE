@@ -1,120 +1,104 @@
 "use client";
 
-import Link from "next/link";
-import { ChevronLeft, ChevronRight, FileText } from "lucide-react";
-import Header from "@/components/layout/Header";
-import StatusBadge from "@/components/ui/StatusBadge";
-import { useQuotes } from "@/hooks/useQuotes";
+import { useState, useMemo } from "react";
+import { ChevronLeft, FileText } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { QUOTE_STATUS_LABELS, formatQuoteDate, formatQuotePrice } from "@/utils/quote";
-import { getPrimaryProductImage } from "@/utils/product";
+import QuoteCard from "@/components/quote/QuoteCard";
+import { useQuotes } from "@/hooks/useQuotes";
+import { ApiQuote } from "@/types/api";
+import { QUOTE_STATUS_LABELS } from "@/utils/quote";
+
+type FilterValue = "All" | ApiQuote["status"];
+
+const FILTERS: FilterValue[] = ["All", "pending", "quote_sent", "accepted", "declined"];
 
 export default function QuoteListPage() {
-  const { quotes, loading } = useQuotes();
   const router = useRouter();
+  const [filter, setFilter] = useState<FilterValue>("All");
+  const { quotes, loading } = useQuotes();
+
+  const filtered = useMemo(() => {
+    if (filter === "All") return quotes;
+    return quotes.filter((q) => q.status === filter);
+  }, [filter, quotes]);
 
   return (
-    <div className="min-h-screen bg-white">
-      <div className="hidden md:block">
-        <Header />
+    <div className="min-h-screen flex flex-col bg-white">
+      <div className="flex items-center px-4 pb-2 gap-2" style={{ paddingTop: "calc(var(--sat) + 1rem)" }}>
+        <button
+          onClick={() => router.back()}
+          className="w-9 h-9 flex items-center justify-center"
+        >
+          <ChevronLeft className="w-5 h-5 text-[#111827]" />
+        </button>
+        <div>
+          <h1 className="text-[16px] font-bold text-[#111827]">My Quotes</h1>
+          {!loading && <p className="text-xs text-[#6B7280]">{quotes.length} total quotes</p>}
+        </div>
       </div>
 
-      <div className="max-w-4xl mx-auto px-6 pt-0 pb-8">
-        <div className="bg-white border border-t-0 border-[#E5E7EB] rounded-b-2xl overflow-hidden">
-          {/* Page title bar */}
-          <div className="border-b border-[#E5E7EB]">
-            <div className="relative flex items-center justify-center min-h-[56px] px-4" style={{ paddingTop: "calc(var(--sat) + 0.5rem)", paddingBottom: "0.5rem" }}>
+      {/* Filter chips */}
+      <div className="max-w-3xl mx-auto w-full px-4 mt-3">
+        <div className="flex gap-2 overflow-x-auto pb-1 [&::-webkit-scrollbar]:hidden">
+          {FILTERS.map((f) => {
+            const active = filter === f;
+            return (
               <button
-                onClick={() => router.back()}
-                className="absolute left-4 w-8 h-8 flex items-center justify-center rounded-full hover:bg-[#F5F5F7] transition-colors"
+                key={f}
+                onClick={() => setFilter(f)}
+                className={`shrink-0 px-3.5 py-2 rounded-full text-xs font-medium border transition-colors ${
+                  active
+                    ? "bg-accent text-white border-accent"
+                    : "bg-white text-[#6B7280] border-[#E5E7EB]"
+                }`}
               >
-                <ChevronLeft className="w-5 h-5 text-[#111827]" />
+                {f === "All" ? "All" : QUOTE_STATUS_LABELS[f]}
               </button>
-              <h1 className="text-[17px] font-bold text-[#111827]">My Quotes</h1>
-            </div>
-            {!loading && (
-              <p className="text-center text-xs text-[#6B7280] pb-2">{quotes.length} active</p>
-            )}
-          </div>
+            );
+          })}
+        </div>
+      </div>
 
-          {/* Content */}
-          <div className="p-4 flex flex-col gap-3">
-            {loading ? (
-              [1, 2, 3].map((i) => (
-                <div key={i} className="bg-white border border-[#E5E7EB] rounded-xl p-3.5 animate-pulse">
-                  <div className="flex items-start justify-between mb-3">
-                    <div>
-                      <div className="h-3.5 w-28 bg-[#E5E7EB] rounded mb-1.5" />
-                      <div className="h-3 w-24 bg-[#E5E7EB] rounded" />
-                    </div>
-                    <div className="h-6 w-20 bg-[#E5E7EB] rounded-full" />
+      <div className="flex-1 max-w-3xl mx-auto w-full px-4 mt-4 pb-10">
+        {loading ? (
+          <div className="flex flex-col gap-3">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="bg-white border border-[#E5E7EB] rounded-xl p-3.5 animate-pulse">
+                <div className="flex items-start justify-between mb-3">
+                  <div>
+                    <div className="h-3.5 w-28 bg-[#E5E7EB] rounded mb-1.5" />
+                    <div className="h-3 w-20 bg-[#E5E7EB] rounded" />
                   </div>
-                  <div className="flex items-center gap-3">
-                    <div className="w-14 h-16 rounded-lg bg-[#E5E7EB] shrink-0" />
-                    <div className="flex-1 space-y-2">
-                      <div className="h-3.5 w-3/4 bg-[#E5E7EB] rounded" />
-                      <div className="h-4 w-24 bg-[#E5E7EB] rounded" />
-                      <div className="h-3 w-20 bg-[#E5E7EB] rounded" />
-                    </div>
+                  <div className="h-6 w-20 bg-[#E5E7EB] rounded-full" />
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="w-14 h-16 rounded-lg bg-[#E5E7EB] shrink-0" />
+                  <div className="flex-1 space-y-2">
+                    <div className="h-3.5 w-3/4 bg-[#E5E7EB] rounded" />
+                    <div className="h-3 w-16 bg-[#E5E7EB] rounded" />
+                    <div className="h-4 w-24 bg-[#E5E7EB] rounded" />
                   </div>
                 </div>
-              ))
-            ) : quotes.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-20 gap-3">
-                <FileText className="w-12 h-12 text-[#9CA3AF]" />
-                <p className="text-sm font-semibold text-[#111827]">No quotes yet</p>
-                <p className="text-xs text-[#6B7280]">Your submitted quote requests will appear here</p>
               </div>
-            ) : (
-              quotes.map((q) => {
-                const product = q.items[0]?.product;
-                const extraItems = q.items.length - 1;
-                return (
-                  <Link
-                    key={q.id}
-                    href={`/quote/detail?id=${q.id}`}
-                    className="block bg-white border border-[#E5E7EB] rounded-xl p-3.5 hover:shadow-sm transition-shadow"
-                  >
-                    <div className="flex items-start justify-between mb-3">
-                      <div>
-                        <p className="text-[13px] font-bold text-[#111827]">{q.quoteId}</p>
-                        <p className="text-[11px] text-[#6B7280] mt-0.5">Submitted on {formatQuoteDate(q.createdAt)}</p>
-                      </div>
-                      <StatusBadge status={QUOTE_STATUS_LABELS[q.status] ?? q.status} />
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <img
-                        src={getPrimaryProductImage(product)}
-                        alt={product?.name ?? "Product"}
-                        className="w-14 h-16 rounded-lg object-cover bg-[#F5F5F7] shrink-0"
-                      />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-[13px] font-semibold text-[#111827] leading-snug line-clamp-2">
-                          {product?.name ?? "—"}
-                          {extraItems > 0 && (
-                            <span className="text-[#6B7280] font-normal"> +{extraItems} more</span>
-                          )}
-                        </p>
-                        {q.quotedPrice ? (
-                          <div className="flex items-baseline gap-1.5 mt-1.5">
-                            <span className="text-[11px] text-[#6B7280]">Quoted</span>
-                            <span className="text-[15px] font-bold text-accent">{formatQuotePrice(q.quotedPrice)}</span>
-                          </div>
-                        ) : (
-                          <p className="text-[12px] text-[#6B7280] mt-1.5">Awaiting quote</p>
-                        )}
-                        {q.validUntil && (
-                          <p className="text-[11px] text-[#F59E0B] mt-0.5">Valid until {formatQuoteDate(q.validUntil)}</p>
-                        )}
-                      </div>
-                      <ChevronRight className="w-4 h-4 text-[#9CA3AF] shrink-0" />
-                    </div>
-                  </Link>
-                );
-              })
+            ))}
+          </div>
+        ) : filtered.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-20 gap-3">
+            <FileText className="w-12 h-12 text-[#9CA3AF]" />
+            <p className="text-sm font-semibold text-[#111827]">
+              {quotes.length === 0 ? "No quotes yet" : "No quotes in this status"}
+            </p>
+            {quotes.length === 0 && (
+              <p className="text-xs text-[#6B7280]">Your submitted quote requests will appear here</p>
             )}
           </div>
-        </div>
+        ) : (
+          <div className="flex flex-col gap-3">
+            {filtered.map((quote) => (
+              <QuoteCard key={quote.id} quote={quote} />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

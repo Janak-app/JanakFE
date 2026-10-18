@@ -1,17 +1,26 @@
 "use client";
 
 import { useState } from "react";
-import { Mail, Lock, Eye, EyeOff } from "lucide-react";
+import { Mail, Lock, Eye, EyeOff, Phone } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { AxiosError } from "axios";
+import { toast } from "react-toastify";
 import useMutationApi from "@/hooks/useMutationApi";
+import { MeUser } from "@/hooks/useMe";
+import { useAuth } from "@/context/AuthContext";
+import { normalizePhone, isValidIndianMobile } from "@/utils/phone";
 
 const signupSchema = z
   .object({
     email: z.string().min(1, "Email is required").email("Invalid email format"),
+    phone: z
+      .string()
+      .min(1, "Mobile number is required")
+      .refine((v) => isValidIndianMobile(normalizePhone(v)), "Enter a valid 10-digit mobile number"),
     password: z
       .string()
       .min(8, "Minimum 8 characters")
@@ -31,22 +40,26 @@ type SignupFormData = z.infer<typeof signupSchema>;
 interface RegisterPayload {
   email: string;
   password: string;
-  guestToken: string;
+  phone: string;
+  guestToken?: string;
   [key: string]: unknown;
 }
 
 interface RegisterResponse {
-  message: string;
+  accessToken: string;
+  user: MeUser;
 }
 
 export default function SignupForm() {
   const router = useRouter();
+  const { setUser } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const {
     register,
     handleSubmit,
+    setError,
     formState: { errors, isValid },
   } = useForm<SignupFormData>({
     resolver: zodResolver(signupSchema),
@@ -59,19 +72,37 @@ export default function SignupForm() {
   >({
     endpoint: "v1/auth/register",
     method: "POST",
+    // 409s for duplicate email/phone are shown on the matching field below
+    errorOff: true,
   });
 
   const onSubmit = async (data: SignupFormData) => {
     try {
-      const guestToken = localStorage.getItem("guestToken") ?? "";
-      await registerUser({
+      const guestToken = localStorage.getItem("guestToken");
+      const res = await registerUser({
         email: data.email,
         password: data.password,
-        guestToken,
-      } as RegisterPayload);
+        phone: normalizePhone(data.phone),
+        ...(guestToken ? { guestToken } : {}),
+      });
+      if (res?.accessToken) {
+        localStorage.setItem("accessToken", res.accessToken);
+      }
+      if (res?.user) {
+        setUser(res.user);
+      }
       router.push("/");
-    } catch {
-      // error handled by useMutationApi via toast
+    } catch (err) {
+      const message =
+        (err as AxiosError<{ message?: string }>)?.response?.data?.message ??
+        "Cannot perform the operation";
+      if (/phone/i.test(message)) {
+        setError("phone", { message });
+      } else if (/email/i.test(message)) {
+        setError("email", { message });
+      } else {
+        toast.error(message);
+      }
     }
   };
 
@@ -125,6 +156,33 @@ export default function SignupForm() {
           </div>
           {errors.email && (
             <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>
+          )}
+        </div>
+
+        {/* Mobile Number */}
+        <div>
+          <label className="block text-sm font-medium text-gray-800 mb-1.5">
+            Mobile Number
+          </label>
+          <div
+            className={`flex items-center border rounded-xl px-3.5 py-3 gap-2.5 bg-white ${
+              errors.phone ? "border-red-400" : "border-gray-300"
+            }`}
+          >
+            <Phone className="w-4 h-4 text-gray-400 shrink-0" />
+            <span className="text-sm text-gray-500">+91</span>
+            <input
+              type="tel"
+              inputMode="numeric"
+              placeholder="98765 43210"
+              maxLength={16}
+              {...register("phone")}
+              className="flex-1 text-sm text-gray-800 outline-none bg-transparent placeholder:text-gray-400"
+              autoComplete="tel"
+            />
+          </div>
+          {errors.phone && (
+            <p className="text-red-500 text-xs mt-1">{errors.phone.message}</p>
           )}
         </div>
 

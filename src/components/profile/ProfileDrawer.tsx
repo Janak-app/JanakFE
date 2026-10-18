@@ -45,7 +45,7 @@ export default function ProfileDrawer({ open, onClose }: ProfileDrawerProps) {
     { icon: Cpu, label: "My Equipment", sub: "1 registered", onClick: () => { onClose(); show("Equipment registry — coming soon", "info"); } },
     { icon: Download, label: "Download Invoices", onClick: () => { onClose(); show("Preparing download...", "info"); } },
     { icon: Bell, label: "Notification Preferences", href: "/notifications" },
-    { icon: MessageSquare, label: "Contact Support", sub: "Mon–Sat · 9AM–6PM", href: "/chat" },
+    { icon: MessageSquare, label: "Contact Support", sub: "Mon–Sat · 9AM–6PM", href: "/contact" },
     { icon: LogOut, label: "Logout", onClick: handleLogout, danger: true },
   ] as const;
 

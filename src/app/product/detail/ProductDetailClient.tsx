@@ -5,7 +5,7 @@ import Image from "next/image";
 import Slider from "react-slick";
 import { useSearchParams, useRouter } from "next/navigation";
 import {
-  ChevronLeft, ChevronRight, Heart, Phone,
+  ChevronLeft, ChevronRight, Heart,
   Star, CheckCircle, ShoppingCart, ClipboardList, FileText, Download,
 } from "lucide-react";
 import StatusBadge from "@/components/ui/StatusBadge";
@@ -15,6 +15,8 @@ import useProductDetail from "@/hooks/useProductDetail";
 import { useCart } from "@/context/CartContext";
 import { useToast } from "@/context/ToastContext";
 import { useAddToWishlist } from "@/hooks/useWishlist";
+import useSalesRepEnquiry from "@/hooks/useSalesRepEnquiry";
+import SalesRepCard from "@/components/product/SalesRepCard";
 
 const TABS = ["Overview", "Key Specifications", "Reviews", "Downloads"] as const;
 type TabKey = typeof TABS[number];
@@ -26,12 +28,12 @@ export default function ProductDetailClient() {
   const { addItem, items, updateQty, cartCount } = useCart();
   const { show } = useToast();
   const addToWishlist = useAddToWishlist();
+  const trackSalesRep = useSalesRepEnquiry();
 
   const { data, loading, isError } = useProductDetail(id);
   const product = data?.product ?? null;
   const salesRepName = data?.salesRepName ?? "Sales Team";
   const salesRepPhone = data?.salesRepPhone ?? "";
-  const salesRepInitials = salesRepName.slice(0, 2).toUpperCase();
 
   const [tab, setTab] = useState<TabKey>("Overview");
   const [imgIdx, setImgIdx] = useState(0);
@@ -193,22 +195,11 @@ export default function ProductDetailClient() {
           </div>
 
           {/* Sales rep card */}
-          <button
-            onClick={() => window.open(`tel:${salesRepPhone.replace(/\s/g, "")}`, "_self")}
-            className="w-full flex items-center gap-3 bg-[#F5F5F7] border border-[#E5E7EB] rounded-xl p-3 mb-5 text-left"
-          >
-            <div className="w-10 h-10 rounded-full bg-accent flex items-center justify-center shrink-0">
-              <span className="text-white font-bold text-sm">{salesRepInitials}</span>
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-[9px] font-bold text-[#6B7280] tracking-[1.5px]">YOUR SALES REP</p>
-              <p className="text-sm font-bold text-[#111827] mt-0.5">{salesRepName}</p>
-              <p className="text-xs text-[#6B7280]">{salesRepPhone}</p>
-            </div>
-            <div className="w-9 h-9 rounded-full bg-[#16A34A] flex items-center justify-center shrink-0">
-              <Phone className="w-4 h-4 text-white" />
-            </div>
-          </button>
+          <SalesRepCard
+            name={salesRepName}
+            phone={salesRepPhone}
+            onCall={() => trackSalesRep.mutate({ productId: product.id })}
+          />
 
           {/* Tabs */}
           <div className="flex border-b border-[#E5E7EB] mb-4">
